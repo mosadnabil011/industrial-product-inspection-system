@@ -1,33 +1,51 @@
 from flask import Blueprint, jsonify
 from database.db import get_db
+import logging
 
 stats_bp = Blueprint("stats", __name__)
 
-@stats_bp.route("/summary")
+@stats_bp.route("/summary", methods=["GET"])
 def summary():
-    db = get_db()
-    cursor = db.cursor()
+    try:
+        db = get_db()
+        cursor = db.cursor()
 
-    # عدد المنتجات السليمة
-    cursor.execute("SELECT COUNT(*) FROM products WHERE status='OK'")
-    ok_count = cursor.fetchone()[0]
+        # ========================
+        # Count OK / NOT_OK
+        # ========================
+        cursor.execute("""
+            SELECT 
+                SUM(CASE WHEN status='OK' THEN 1 ELSE 0 END) as ok_count,
+                SUM(CASE WHEN status='NOT_OK' THEN 1 ELSE 0 END) as not_ok_count
+            FROM products
+        """)
 
-    # عدد المنتجات التالفة
-    cursor.execute("SELECT COUNT(*) FROM products WHERE status='NOT_OK'")
-    not_ok_count = cursor.fetchone()[0]
+        result = cursor.fetchone()
+        ok_count = result[0] or 0
+        not_ok_count = result[1] or 0
 
-    # عدد المنتجات لكل لون
-    cursor.execute("SELECT color, COUNT(*) FROM products GROUP BY color")
-    color_counts = cursor.fetchall()
+        # ========================
+        # Count per Color
+        # ========================
+        cursor.execute("""
+            SELECT color, COUNT(*) 
+            FROM products 
+            GROUP BY color
+        """)
 
-    # تحويل النتيجة لقاموس {color: count}
-    colors = {color: count for color, count in color_counts}
+        color_counts = cursor.fetchall()
+        colors = {color: count for color, count in color_counts}
 
-    db.close()
+        db.close()
 
-    # JSON النهائي
-    return jsonify({
-        "ok": ok_count,
-        "not_ok": not_ok_count,
-        "colors": colors
-    })
+        return jsonify({
+            "ok": ok_count,
+            "not_ok": not_ok_count,
+            "colors": colors
+        }), 200
+
+    except Exception as e:
+        logging.error(f"Stats Error: {e}")
+        return jsonify({
+            "error": "Failed to fetch statistics"
+        }), 500

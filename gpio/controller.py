@@ -2,87 +2,86 @@
 
 import RPi.GPIO as GPIO
 
-GPIO.setmode(GPIO.BCM)
 
-# ========================
-# Pin Configuration
-# ========================
+class MotorController:
 
-button_main = 17
-button_bad = 27
-button_emergency = 22
+    def __init__(self):
 
-relay_main = 23
-relay_bad = 24
+        GPIO.setmode(GPIO.BCM)
 
-# ========================
-# GPIO Initialization
-# ========================
+        # ========================
+        # Motor Configuration
+        # ========================
+        # can add more motors by adding entries here
+        self.motors = {
+            "main": {"relay": 23, "button": 17, "state": False},
+            "bad": {"relay": 24, "button": 27, "state": False},
+        }
 
-GPIO.setup(button_main, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-GPIO.setup(button_bad, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-GPIO.setup(button_emergency, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+        self.emergency_button = 22
 
-GPIO.setup(relay_main, GPIO.OUT)
-GPIO.setup(relay_bad, GPIO.OUT)
+        # ========================
+        # GPIO Setup
+        # ========================
+        for name, motor in self.motors.items():
+            GPIO.setup(motor["relay"], GPIO.OUT)
+            GPIO.output(motor["relay"], GPIO.LOW)
 
-GPIO.output(relay_main, GPIO.LOW)
-GPIO.output(relay_bad, GPIO.LOW)
+            GPIO.setup(motor["button"], GPIO.IN,
+                        pull_up_down=GPIO.PUD_DOWN)
 
-# ========================
-# States
-# ========================
+            
+            GPIO.add_event_detect(
+                motor["button"],
+                GPIO.RISING,
+                callback=lambda channel, n=name: self.toggle_motor(n),
+                bouncetime=300
+            )
 
-main_state = False
-bad_state = False
+        GPIO.setup(self.emergency_button, GPIO.IN,
+                    pull_up_down=GPIO.PUD_DOWN)
 
-# ========================
-# Motor Control Functions
-# ========================
+        GPIO.add_event_detect(
+            self.emergency_button,
+            GPIO.RISING,
+            callback=self.emergency_stop,
+            bouncetime=300
+        )
 
-def toggle_main(channel=None):
-    global main_state
-    main_state = not main_state
-    GPIO.output(relay_main, main_state)
-    print("Main Motor:", main_state)
-    return main_state
+    # ========================
+    # Dynamic Methods
+    # ========================
 
+    def toggle_motor(self, name):
 
-def toggle_bad(channel=None):
-    global bad_state
-    bad_state = not bad_state
-    GPIO.output(relay_bad, bad_state)
-    print("Bad Motor:", bad_state)
-    return bad_state
+        if name not in self.motors:
+            raise ValueError(f"Motor '{name}' not found")
 
+        motor = self.motors[name]
 
-def emergency_stop(channel=None):
-    global main_state, bad_state
+        motor["state"] = not motor["state"]
+        GPIO.output(motor["relay"], motor["state"])
 
-    print("!!! EMERGENCY STOP ACTIVATED !!!")
+        print(f"{name.upper()} Motor:", motor["state"])
 
-    main_state = False
-    bad_state = False
+        return motor["state"]
 
-    GPIO.output(relay_main, GPIO.LOW)
-    GPIO.output(relay_bad, GPIO.LOW)
+    def emergency_stop(self, channel=None):
 
-    return {
-        "main_motor": main_state,
-        "bad_motor": bad_state
-    }
+        print("!!! EMERGENCY STOP ACTIVATED !!!")
 
+        for motor in self.motors.values():
+            motor["state"] = False
+            GPIO.output(motor["relay"], GPIO.LOW)
 
-def get_status():
-    return {
-        "main_motor": main_state,
-        "bad_motor": bad_state
-    }
+        return self.get_status()
 
-# ========================
-# Hardware Button Events
-# ========================
+    def get_status(self):
 
-GPIO.add_event_detect(button_main, GPIO.RISING, callback=toggle_main, bouncetime=300)
-GPIO.add_event_detect(button_bad, GPIO.RISING, callback=toggle_bad, bouncetime=300)
-GPIO.add_event_detect(button_emergency, GPIO.RISING, callback=emergency_stop, bouncetime=300)
+        return {
+            name: motor["state"]
+            for name, motor in self.motors.items()
+        }
+
+    def cleanup(self):
+        GPIO.cleanup()
