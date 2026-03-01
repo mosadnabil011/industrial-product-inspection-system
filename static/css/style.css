@@ -1,0 +1,153 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.container {
+    margin-left: 280px !important;
+    transition: margin-left 0.3s ease;
+}
+
+/* //////////////theme///////////////////// */
+.theme-float {
+    position: fixed;
+    bottom: 25px;
+    right: 25px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    font-size: 22px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: linear-gradient(135deg, #3b82f6, #22d3ee);
+    color: white;
+
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+    transition: 0.3s ease;
+    z-index: 999;
+}
+
+.theme-float:hover {
+    transform: scale(1.1) rotate(15deg);
+}
+
+/* /////////////////////////////////sidebar///////////////////////////////// */
+#sidebar {
+    background-color: #121c32 !important;
+    backdrop-filter: blur(10px) !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.1) !important;
+    transition: 0.3s ease;
+
+
+}
+
+
+
+.sidebar-collapsed {
+    width: 80px !important;
+    min-width: 80px !important;
+    height: 100%;
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+    transition: 0.3s ease;
+
+}
+
+
+
+
+.sidebar-collapsed .sidebar-text {
+    display: none;
+}
+
+
+.sidebar-collapsed .nav-link {
+    justify-content: center;
+}
+
+#sidebar.sidebar-collapsed+.container {
+    margin-left: 140px !important;
+}
+
+/* /////////////////////////////////// body dark light ///////////////////////////////////////////////// */
+body.dark {
+    background-color: #0f172a !important;
+    background-image:
+        linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+    background-size: 40px 40px;
+    color: white !important;
+}
+
+body.dark .theme-float {
+    background: linear-gradient(135deg, #3b82f6, #22d3ee);
+    color: rgb(0, 0, 0);
+}
+
+body.dark #sidebar {
+    background: rgba(255, 255, 255, 0.05) !important;
+    backdrop-filter: blur(10px) !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.1) !important;
+
+}
+
+body.dark .card {
+    min-width: 250px !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+    backdrop-filter: blur(12px) !important;
+
+
+    border-radius: 20px !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+
+    color: white !important;
+    transition: 0.3s ease !important;
+
+}
+
+body {
+    background-color: #f8fafc !important;
+    background-image:
+        linear-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
+    background-size: 40px 40px;
+    color: #0f172a !important;
+
+}
+
+body #sidebar {
+    background-color: #1b2335 !important;
+}
+
+
+body .card {
+    min-width: 250px !important;
+    background: rgba(255, 255, 255, 0.6) !important;
+    backdrop-filter: blur(12px) !important;
+    border-radius: 20px !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+    color: #0f172a !important;
+    transition: 0.3s ease !important;
+}
+
+
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+}
+
+.transition-all {
+    transition: width 0.3s ease;
+    overflow-x: hidden;
+    white-space: nowrap;
+}
