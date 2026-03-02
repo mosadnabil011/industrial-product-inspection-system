@@ -50,27 +50,27 @@ btnCollapse.addEventListener("click", () => {
     }
 });
 
-
-// line status
-const apilineStatus = "http://localhost:3000/lineStatus";
+const apilineStatus = "http://localhost:3000/lines";
 const lineState = document.getElementById("lineStatus");
+
 async function fetchlineState() {
     try {
         const res = await fetch(apilineStatus);
         const data = await res.json();
+        const lines = data;
+        const anyRunning = lines.some(line => line.status === "Running");
+        const overallStatus = anyRunning ? "Running" : "Stopped";
 
-
-        lineState.textContent = data.status;
+        lineState.textContent = overallStatus;
         lineState.classList.remove("bg-success", "bg-warning", "bg-danger");
-        if (data.status === "Running") lineState.classList.add("bg-success");
-        else if (data.status === "Stopped") lineState.classList.add("bg-warning");
+        if (overallStatus === "Running") lineState.classList.add("bg-success");
         else lineState.classList.add("bg-danger");
 
     } catch (error) {
         console.error("Error fetching line status:", error);
         lineState.textContent = "Error";
-        lineState.classList.remove("bg-success", "bg-warning");
-        lineState.classList.add("bg-danger");
+        lineState.classList.remove("bg-success", "bg-danger");
+        lineState.classList.add("bg-warning");
     }
 }
 // boxes data
