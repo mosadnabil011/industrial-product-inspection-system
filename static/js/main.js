@@ -1,4 +1,3 @@
-
 const toggleBtn = document.getElementById("themeToggleBtn");
 const icon = document.getElementById("themeIcon");
 
@@ -76,10 +75,10 @@ async function fetchlineState() {
 }
 // boxes data
 const apistatistics = "http://localhost:3000/statistics";
-const TBoxes = document.getElementById("Total Boxes")
-const VBoxes = document.getElementById("Valid Boxes")
-const IVBoxes = document.getElementById("Invalid Boxes")
-const DR = document.getElementById("Defect Rate")
+const TBoxes = document.getElementById("TotalBoxes")
+const VBoxes = document.getElementById("ValidBoxes")
+const IVBoxes = document.getElementById("InvalidBoxes")
+const DR = document.getElementById("DefectRate")
 async function boxes() {
     try {
         const res = await fetch(apistatistics);
@@ -99,7 +98,7 @@ async function boxes() {
 // control
 const apiUrlLine = "http://localhost:3000/lines";
 
-async function fetchData() {
+async function ControlData() {
     try {
         const res = await fetch(apiUrlLine);
         const data = await res.json();
@@ -174,9 +173,10 @@ async function emergencyStop() {
 
 fetchlineState();
 boxes();
-fetchData();
+ControlData();
 setInterval(fetchlineState, 1000);
 setInterval(boxes, 1000);
+setInterval(ControlData, 1000);
 
 
 
