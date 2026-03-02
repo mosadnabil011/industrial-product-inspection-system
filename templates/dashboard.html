@@ -15,27 +15,10 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
     />
     <title>Document</title>
-    <style>
-  
-
-  #sidebar{
-    width:250px;
-  }
-
-  
-
-  section{
-    min-height:100vh;
-  }
-
-  .nav-link.active{
-    background:#0d6efd !important;
-    color:#fff !important;
-  }
-</style>
+    
   </head>
   <body
-    class="dark"
+    
     data-bs-spy="scroll"
     data-bs-target="#sidebarNav"
     data-bs-offset="100"
@@ -66,11 +49,11 @@
           </li>
           <li>
             <a
-              href="#Live"
+              href="#Control"
               class="nav-link text-white d-flex align-items-center"
             >
-              <span class="me-2"><i class="fa-solid fa-tv"></i></span>
-              <span class="sidebar-text">Live</span>
+              <span class="me-2"><i class="fa-solid fa-gears"></i></span>
+              <span class="sidebar-text">Control</span>
             </a>
           </li>
           <li>
@@ -156,8 +139,70 @@
 
     
 
-  <section id="Live" class=" p-4 ">
-    <h2>Live Monitoring</h2>
+  <section id="Control" class=" p-4 ">
+    <div class="flex-grow-1 p-4">
+  <h2 class="mb-4 text-center">Control Panel</h2>
+
+  <div class="row g-4">
+
+    <!-- Line 1 -->
+    <div class="col-lg-4 col-md-6">
+      <div class="card control-card text-center p-4">
+        <i class="fa-solid fa-industry fa-2x mb-3"></i>
+        <h5>Line 1</h5>
+        <br />
+        <button class="btn disabled" id="status1" onclick="toggleLine(1)">
+          Stop
+        </button>
+      </div>
+    </div>
+
+    <!-- Line 2 -->
+    <div class="col-lg-4 col-md-6">
+      <div class="card control-card text-center p-4">
+        <i class="fa-solid fa-industry fa-2x mb-3"></i>
+        <h5>Line 2</h5>
+        <br />
+        <button class="btn disabled"  id="status2" onclick="toggleLine(2)">
+          Stop
+        </button>
+      </div>
+    </div>
+
+    <!-- Motor -->
+    <div class="col-lg-4 col-md-6">
+      <div class="card control-card text-center p-4">
+        <i class="fa-solid fa-gears fa-2x mb-3"></i>
+        <h5>Feeding Motor</h5>
+        <br />
+        <button class="btn disabled" id="status3" onclick="toggleLine(3)">
+          Stop
+        </button>
+      </div>
+    </div>
+
+    
+    <!-- Emergency Stop Card -->
+    <div class="col-lg-4 order-lg-2" >
+     <div class="card text-center p-4 bg-danger text-white" style="height:350px;">
+       
+       <h5><i class="fa-solid fa-hand-paper  mb-2 d-inline "></i> EMERGENCY STOP</h5>
+        <hr>
+        <p class="my-4 text-muted emergency">Clicking the button below will immediately stop all lines and the feeding motor.</p>
+        <hr>
+       <button class="btn btn-danger" onclick="emergencyStop()">STOP ALL</button>
+     </div>
+    </div>
+    <!-- live card -->
+     <div class="card col-lg-8 order-lg-1 text-center p-4" style="height:350px;">
+       <h5 ><i class="fa-solid fa-tv"></i> live</h5>
+       <hr>
+     </div>
+    
+  </div>
+</div>
+
+
   </section>
 
   <section id="Reports" class=" p-4">

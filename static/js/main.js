@@ -1,4 +1,4 @@
-const apiurl = "./data.json";
+
 const toggleBtn = document.getElementById("themeToggleBtn");
 const icon = document.getElementById("themeIcon");
 
@@ -53,17 +53,18 @@ btnCollapse.addEventListener("click", () => {
 
 
 // line status
+const apilineStatus = "http://localhost:3000/lineStatus";
 const lineState = document.getElementById("lineStatus");
 async function fetchlineState() {
     try {
-        const res = await fetch(apiurl);
+        const res = await fetch(apilineStatus);
         const data = await res.json();
 
 
-        lineState.textContent = data[0].status;
+        lineState.textContent = data.status;
         lineState.classList.remove("bg-success", "bg-warning", "bg-danger");
-        if (data[0].status === "Running") lineState.classList.add("bg-success");
-        else if (data[0].status === "Stopped") lineState.classList.add("bg-warning");
+        if (data.status === "Running") lineState.classList.add("bg-success");
+        else if (data.status === "Stopped") lineState.classList.add("bg-warning");
         else lineState.classList.add("bg-danger");
 
     } catch (error) {
@@ -74,19 +75,20 @@ async function fetchlineState() {
     }
 }
 // boxes data
+const apistatistics = "http://localhost:3000/statistics";
 const TBoxes = document.getElementById("Total Boxes")
 const VBoxes = document.getElementById("Valid Boxes")
 const IVBoxes = document.getElementById("Invalid Boxes")
 const DR = document.getElementById("Defect Rate")
 async function boxes() {
     try {
-        const res = await fetch(apiurl);
+        const res = await fetch(apistatistics);
         const data = await res.json();
 
-        TBoxes.textContent = data[1].TotalBoxes;
-        VBoxes.textContent = data[1].ValidBoxes;
-        IVBoxes.textContent = data[1].InvalidBoxes;
-        DR.textContent = data[1].DefectRate;
+        TBoxes.textContent = data.TotalBoxes;
+        VBoxes.textContent = data.ValidBoxes;
+        IVBoxes.textContent = data.InvalidBoxes;
+        DR.textContent = data.DefectRate;
 
 
     }
@@ -94,9 +96,85 @@ async function boxes() {
         console.error("Error fetching Boxes:", error);
     }
 }
+// control
+const apiUrlLine = "http://localhost:3000/lines";
+
+async function fetchData() {
+    try {
+        const res = await fetch(apiUrlLine);
+        const data = await res.json();
+
+        data.forEach(machine => updateUI(machine));
+
+    } catch (error) {
+        console.error("Error fetching machine data:", error);
+    }
+}
+
+function updateUI(machine) {
+    const element = document.getElementById(`status${machine.id}`);
+    if (!element) return;
+
+    element.textContent = machine.status;
+
+    element.classList.remove("btn-success", "btn-danger", "disabled");
+
+    element.classList.add(machine.status === "Running" ? "btn-success" : "btn-danger");
+}
+
+async function toggleLine(id) {
+    try {
+        const res = await fetch(`${apiUrlLine}/${id}`);
+        const machine = await res.json();
+        if (!machine) return;
+
+        const newStatus = machine.status === "Running" ? "Stopped" : "Running";
+
+        await fetch(`${apiUrlLine}/${id}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ status: newStatus })
+        });
+
+        updateUI({ id, status: newStatus });
+
+    } catch (error) {
+        console.error("Error toggling line:", error);
+    }
+}
+async function emergencyStop() {
+    try {
+        const res = await fetch(apiUrlLine);
+        const data = await res.json();
+
+        for (let machine of data) {
+            if (machine.status !== "Stopped") {
+                await fetch(`${apiUrlLine}/${machine.id}`, {
+                    method: "PATCH",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ status: "Stopped" })
+                });
+
+                updateUI({ id: machine.id, status: "Stopped" });
+            }
+        }
+
+    } catch (error) {
+        console.error("Error during emergency stop:", error);
+    }
+}
+
+
+
+
+
+
+
+
 
 fetchlineState();
 boxes();
+fetchData();
 setInterval(fetchlineState, 1000);
 setInterval(boxes, 1000);
 
