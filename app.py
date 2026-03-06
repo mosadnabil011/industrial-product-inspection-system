@@ -1,11 +1,14 @@
-from flask import Flask, render_template
+from flask import Flask, render_template ,Response
 from database.db import init_db
 from gpio.controller import MotorController
 from routes.control import init_control_routes
 from routes.stats import stats_bp
 import logging
-
+from vision.detector import VisionSystem
+from flask_cors import CORS
+from vision.stream import gen_frames
 logging.basicConfig(level=logging.INFO)
+
 
 def create_app():
     app = Flask(__name__)
@@ -24,7 +27,11 @@ def create_app():
     # Init Motor Controller
     # ===============================
     motor_controller = MotorController()
-
+    # ===============================
+    # Init Vision System
+    # ===============================
+    vision_system = VisionSystem(motor_controller)
+    vision_system.start()
     # ===============================
     # Register Blueprints
     # ===============================
@@ -36,7 +43,15 @@ def create_app():
         stats_bp,
         url_prefix="/api/stats"
     )
-
+    # ===============================
+    #  Video Stream Route
+    # ===============================
+    @app.route("/video_feed")
+    def video_feed():
+        return Response(
+            gen_frames(), 
+            mimetype="multipart/x-mixed-replace; boundary=frame"
+        )
     # ===============================
     # Dashboard
     # ===============================
@@ -46,7 +61,8 @@ def create_app():
 
     return app
 
+
 if __name__ == "__main__":
     app = create_app()
-    # debug=True للـ dev فقط
+    CORS(app)
     app.run(host="0.0.0.0", port=5000)
