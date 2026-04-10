@@ -165,6 +165,29 @@ async function toggleMotor(typ, toggleTypeBtn) {
 }
 
 
+async function runPusher(button) {
+    button.disabled = true;
+    button.textContent = "RUNNING";
+
+    try {
+        await fetch("http://127.0.0.1:5000/api/control/run-pusher", {
+            method: "POST"
+        });
+
+        setTimeout(() => {
+            button.disabled = false;
+            button.textContent = "RUN PUSHER";
+        }, 8000);
+
+    } catch (err) {
+        console.error(err);
+        button.disabled = false;
+        button.textContent = "RUN PUSHER";
+    }
+}
+
+
+
 
 async function emergencyStop() {
     emergencyBtn.disabled = true;
