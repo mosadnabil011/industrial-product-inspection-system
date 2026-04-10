@@ -78,15 +78,34 @@ async function fetchLineState() {
         if (mainStatus) mainStatus.textContent = data.main ? "Running" : "Stopped";
         if (mainStatus) mainStatus.className = data.main ? "badge bg-success" : "badge bg-warning";
 
-        if (badStatus) badStatus.textContent = data.bad ? "Active" : "Idle";
+        if (badStatus) badStatus.textContent = data.bad ? "Running" : "Stopped";
         if (badStatus) badStatus.className = data.bad ? "badge bg-danger" : "badge bg-secondary";
 
-        if (pusherStatus) pusherStatus.textContent = data.pusher ? "Active" : "Idle";
+        if (pusherStatus) pusherStatus.textContent = data.pusher ? "Running" : "Stopped";
         if (pusherStatus) pusherStatus.className = data.pusher ? "badge bg-primary" : "badge bg-secondary";
+
+
+        updateButton(toggleMainBtn, data.main);
+        updateButton(toggleBadBtn, data.bad);
+        updateButton(togglePusherBtn, data.pusher);
 
     } catch (e) {
         console.error("Fetch line status failed:", e);
         showErrorToast("Error fetching line status!");
+    }
+}
+
+function updateButton(btn, state) {
+    if (!btn) return;
+
+    if (state) {
+        btn.textContent = "RUNNING";
+        btn.classList.remove("btn-danger");
+        btn.classList.add("btn-success");
+    } else {
+        btn.textContent = "STOP";
+        btn.classList.remove("btn-success");
+        btn.classList.add("btn-danger");
     }
 }
 
@@ -115,31 +134,6 @@ async function fetchBoxes() {
 // ==================== TOGGLE FUNCTIONS ====================
 
 
-// async function toggleMain() {
-//     toggleMainBtn.disabled = true; // منع الضغط المتكرر
-//     try {
-//         const response = await fetch('http://192.168.1.11:5000/api/control/toggle-main', {
-//             method: 'POST',
-//         });
-//         const data = await response.json();
-
-//         if (data.main_motor === true) {
-//             toggleMainBtn.textContent = 'RUNNING';
-//             toggleMainBtn.classList.add('running');
-//             toggleMainBtn.classList.remove('stopped');
-//         } else {
-//             toggleMainBtn.textContent = 'STOP';
-//             toggleMainBtn.classList.add('stopped');
-//             toggleMainBtn.classList.remove('running');
-//         }
-//     } catch (err) {
-//         console.error('Error toggling motor:', err);
-//         showMessage('حدث خطأ أثناء التبديل');
-//     } finally {
-//         toggleMainBtn.disabled = false;
-//     }
-// }
-
 const togglePusherBtn = document.getElementById('togglePusherBtn');
 
 
@@ -153,15 +147,11 @@ async function toggleMotor(typ, toggleTypeBtn) {
 
         if (data[`${typ}_motor`] === true) {
             toggleTypeBtn.textContent = 'RUNNING';
-            // toggleTypeBtn.classList.add('running');
-            // toggleTypeBtn.classList.remove('stopped');
             toggleTypeBtn.classList.remove('btn-danger');
             toggleTypeBtn.classList.add('btn-success');
 
         } else {
             toggleTypeBtn.textContent = 'STOP';
-            // toggleTypeBtn.classList.add('stopped');
-            // toggleTypeBtn.classList.remove('running');
 
             toggleTypeBtn.classList.remove('btn-success');
             toggleTypeBtn.classList.add('btn-danger');

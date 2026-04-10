@@ -1,25 +1,5 @@
-# gpio/controller.py
 
-# import RPi.GPIO as GPIO
-try:
-    import RPi.GPIO as GPIO
-except ModuleNotFoundError:
-
-    # Mock GPIO for Windows development
-    class MockGPIO:
-        BCM = OUT = IN = HIGH = LOW = PUD_DOWN = RISING = None
-        
-        def setmode(self, *args): pass
-
-        def setup(self, *args, **kwargs): pass
-
-        def output(self, *args): pass
-
-        def add_event_detect(self, *args, **kwargs): pass
-
-        def cleanup(self): pass
-
-    GPIO = MockGPIO()
+from gpiozero import LED, Button
 import threading
 import time
 
@@ -28,73 +8,62 @@ class MotorController:
 
     def __init__(self):
         self.lock = threading.Lock()
-        GPIO.setmode(GPIO.BCM)
 
         # ========================
         # Motor Configuration
         # ========================
-        # can add more motors by adding entries here
         self.motors = {
-            "main": {"relay": 23, "button": 17, "state": True},
-            "bad": {"relay": 24, "button": 27, "state": False},
-            "pusher": {"relay": 25, "button": None, "state": False},
+            "main": {"relay_pin": 23, "button_pin": 17, "state": False},
+            "bad": {"relay_pin": 24, "button_pin": 27, "state": False},
+            "pusher": {"relay_pin": 25, "button_pin": None, "state": False},
         }
 
-        self.emergency_button = 22
+        self.emergency_button_pin = 22
 
         # ========================
-        # GPIO Setup
+        # Devices Setup
         # ========================
         for name, motor in self.motors.items():
-            GPIO.setup(motor["relay"], GPIO.OUT)
-            GPIO.output(motor["relay"], GPIO.LOW)
 
-            if motor["button"] is not None:
-                GPIO.setup(motor["button"], GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+            # relay
+            motor["relay"] = LED(motor["relay_pin"])
+            motor["relay"].on()  # ensure all motors are OFF at startup
 
-                GPIO.add_event_detect(
-                    motor["button"],
-                    GPIO.RISING,
-                    callback=lambda channel, n=name: self.toggle_motor(n),
-                    bouncetime=300
-                )
+            # button
+            if motor["button_pin"] is not None:
+                motor["button"] = Button(motor["button_pin"])
+                motor["button"].when_pressed = lambda n = name: self.toggle_motor(n)
 
-        GPIO.setup(self.emergency_button, GPIO.IN,
-                    pull_up_down=GPIO.PUD_DOWN)
-
-        GPIO.add_event_detect(
-            self.emergency_button,
-            GPIO.RISING,
-            callback=self.emergency_stop,
-            bouncetime=300
-        )
+        # emergency button
+        self.emergency_button = Button(self.emergency_button_pin)
+        self.emergency_button.when_pressed = self.emergency_stop
 
     # ========================
     # Dynamic Methods
     # ========================
 
     def toggle_motor(self, name):
-
         if name not in self.motors:
             raise ValueError(f"Motor '{name}' not found")
+
         motor = self.motors[name]
         motor["state"] = not motor["state"]
-        # GPIO.output(motor["relay"], motor["state"])
-        GPIO.output(
-            motor["relay"],
-            GPIO.HIGH if motor["state"] else GPIO.LOW)
+
+        # ======== Active LOW ========
+        if motor["state"]:
+            motor["relay"].off()  # trigger relay to turn ON the motor
+        else:
+            motor["relay"].on()  # trigger relay to turn OFF the motor
+
         return motor["state"]
 
-    def emergency_stop(self, channel=None):
-
+    def emergency_stop(self):
         print("!!! EMERGENCY STOP ACTIVATED !!!")
-
         for motor in self.motors.values():
             motor["state"] = False
-            GPIO.output(motor["relay"], GPIO.LOW)
-
+            motor["relay"].on()  # trigger relay to turn OFF all motors
         return self.get_status()
-    
+
     def run_pusher(self, seconds=8):
 
         def worker():
@@ -103,21 +72,19 @@ class MotorController:
                 if motor["state"]:
                     return
                 motor["state"] = True
-                GPIO.output(motor["relay"], GPIO.HIGH)
+                motor["relay"].off()  # trigger relay to turn ON the pusher
+
             time.sleep(seconds)
+
             with self.lock:
                 motor["state"] = False
-                GPIO.output(motor["relay"], GPIO.LOW)
+                motor["relay"].on()  # trigger relay to turn OFF the pusher
 
         threading.Thread(target=worker, daemon=True).start()
-    
-    def get_status(self):
 
-        return {
-            name: motor["state"]
-            for name, motor in self.motors.items()
-        }
+    def get_status(self):
+        return {name: motor["state"] for name, motor in self.motors.items()}
 
     def cleanup(self):
-        GPIO.cleanup()
-
+        for motor in self.motors.values():
+            motor["relay"].on()  # trigger relay to turn OFF all motors
