@@ -15,27 +15,10 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
     />
     <title>Document</title>
-    <style>
-  
-
-  #sidebar{
-    width:250px;
-  }
-
-  
-
-  section{
-    min-height:100vh;
-  }
-
-  .nav-link.active{
-    background:#0d6efd !important;
-    color:#fff !important;
-  }
-</style>
+    
   </head>
   <body
-    class="dark"
+    
     data-bs-spy="scroll"
     data-bs-target="#sidebarNav"
     data-bs-offset="100"
@@ -55,22 +38,23 @@
         </div>
         <h4 class="text-center mb-4 sidebar-text">Control Panel</h4>
         <ul class="nav nav-pills flex-column mb-auto " id="sidebarNav">
-          <li class="nav-item">
+         
+          <li>
+            <a
+              href="#Control"
+              class="nav-link text-white d-flex align-items-center"
+            >
+              <span class="me-2"><i class="fa-solid fa-gears"></i></span>
+              <span class="sidebar-text">Control</span>
+            </a>
+          </li>
+           <li class="nav-item">
             <a
               href="#Dashboard"
               class="nav-link text-white d-flex align-items-center"
             >
               <span class="me-2"><i class="fa-solid fa-sliders"></i></span>
               <span class="sidebar-text">Dashboard</span>
-            </a>
-          </li>
-          <li>
-            <a
-              href="#Live"
-              class="nav-link text-white d-flex align-items-center"
-            >
-              <span class="me-2"><i class="fa-solid fa-tv"></i></span>
-              <span class="sidebar-text">Live</span>
             </a>
           </li>
           <li>
@@ -98,6 +82,72 @@
 
   <div class="main-content flex-grow-1">
 
+<section id="Control" class=" p-4 ">
+    <div class="flex-grow-1 p-4">
+  <h2 class="mb-4 text-center">Control Panel</h2>
+
+  <div class="row g-4">
+
+    <!-- Line 1 -->
+    <div class="col-lg-4 col-md-6">
+      <div class="card control-card text-center p-4">
+        <i class="fa-solid fa-industry fa-2x mb-3"></i>
+        <h5>Line 1</h5>
+        <br />
+<button class="btn btn-danger" id="toggleMainBtn" onclick="toggleMotor('main', toggleMainBtn)">Stop</button>
+
+      </div>
+    </div>
+
+    <!-- Line 2 -->
+    <div class="col-lg-4 col-md-6">
+      <div class="card control-card text-center p-4">
+        <i class="fa-solid fa-industry fa-2x mb-3"></i>
+        <h5>Line 2</h5>
+        <br />
+<button class="btn btn-danger" id="toggleBadBtn" onclick="toggleMotor('bad', toggleBadBtn)">Stop</button>
+
+      </div>
+    </div>
+
+    <!-- Motor -->
+    <div class="col-lg-4 col-md-6">
+      <div class="card control-card text-center p-4">
+        <i class="fa-solid fa-gears fa-2x mb-3"></i>
+        <h5>Feeding Motor</h5>
+        <br />
+<button class="btn btn-danger" id="togglePusherBtn" onclick="toggleMotor('pusher', togglePusherBtn)">Stop</button>
+      </div>
+    </div>
+
+    
+    <!-- Emergency Stop Card -->
+    <div class="col-lg-4 order-lg-2" >
+     <div class="card text-center p-4 bg-danger text-white" style="height:350px;">
+       
+       <h5><i class="fa-solid fa-hand-paper  mb-2 d-inline "></i> EMERGENCY STOP</h5>
+        <hr>
+        <p class="my-4 text-muted emergency">Clicking the button below will immediately stop all lines and the feeding motor.</p>
+        <hr>
+       <button class="btn btn-danger" id="emergencyBtn" onclick="emergencyStop()">STOP ALL</button>
+     </div>
+    </div>
+    <!-- live card -->
+    <div class="card col-lg-8 order-lg-1 text-center p-4" style="height:350px; overflow:hidden;">
+  <h5><i class="fa-solid fa-tv"></i> Live</h5>
+  <hr>
+  <div style="height:100%; display:flex; justify-content:center; align-items:center;">
+  </div>
+</div>
+    
+  </div>
+</div>
+
+
+  </section>
+
+
+
    <section id="Dashboard" class="p-4">
   <div class="text-center Dashboard">
     <h2>Dashboard</h2>
@@ -106,25 +156,25 @@
       <div class="col-lg-3">
         <div class="card p-3 h-100">
           <h3 class="fs-5 opacity-75"> <i class="fa-solid fa-boxes-stacked"></i> Total Boxes</h3>
-          <span class="fs-3 card-text text-black fw-bold" id="Total Boxes">...</span>
+          <span class="fs-3 card-text text-black fw-bold" id="TotalBoxes"><div class="loader"></div></span>
         </div>
       </div>
       <div class="col-lg-3">
         <div class="card p-3 h-100">
           <h3 class="fs-5 opacity-75"><i class="fa-solid fa-box-open text-success"></i> Valid Boxes</h3>
-          <span class="fs-3 text-success fw-bold" id="Valid Boxes">...</span>
+          <span class="fs-3 text-success fw-bold" id="ValidBoxes"><div class="loader"></div></span>
         </div>
       </div>
       <div class="col-lg-3">
         <div class="card p-3 h-100">
           <h3 class="fs-5 opacity-75"><i class="fa-solid fa-boxes-packing text-danger"></i> Invalid Boxes</h3>
-          <span class="fs-3 text-danger fw-bold" id="Invalid Boxes">...</span>
+          <span class="fs-3 text-danger fw-bold" id="InvalidBoxes"><div class="loader"></div></span>
         </div>
       </div>
       <div class="col-lg-3">
         <div class="card p-3 h-100">
           <h3 class="fs-5 opacity-75"><i class="fa-solid fa-exclamation-triangle text-warning"></i> Defect Rate</h3>
-          <span class="fs-3 text-warning fw-bold" id="Defect Rate">...</span>
+          <span class="fs-3 text-warning fw-bold" id="DefectRate"><div class="loader"></div></span>
         </div>
       </div>
     </div>
@@ -156,9 +206,7 @@
 
     
 
-  <section id="Live" class=" p-4 ">
-    <h2>Live Monitoring</h2>
-  </section>
+  
 
   <section id="Reports" class=" p-4">
     <h2>Reports</h2>
