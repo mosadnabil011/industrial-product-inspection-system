@@ -1,4 +1,4 @@
-from flask import Flask, render_template , Response
+from flask import Flask, render_template, stream_with_context, Response
 from database.db import init_db
 from gpio.controller import MotorController
 from routes.control import init_control_routes
@@ -6,7 +6,8 @@ from routes.stats import stats_bp
 import logging
 from vision.detector import VisionSystem
 from flask_cors import CORS
-from vision.stream import gen_frames
+from vision.stream import gen_frames_direct
+
 logging.basicConfig(level=logging.INFO)
 
 
@@ -14,49 +15,40 @@ def create_app():
     app = Flask(__name__)
     app.config["SECRET_KEY"] = "graduation-project-secret"
 
-    # ===============================
-    # Init database safely
-    # ===============================
+    # ── Database ──────────────────────────────────────────────────────────
     try:
         init_db()
         logging.info("Database initialized successfully")
     except Exception as e:
         logging.error(f"Database initialization failed: {e}")
 
-    # ===============================
-    # Init Motor Controller
-    # ===============================
+    # ── Motor Controller ──────────────────────────────────────────────────
     motor_controller = MotorController()
-    # ===============================
-    # Init Vision System
-    # ===============================
+
+    # ── Vision System ─────────────────────────────────────────────────────
     vision_system = VisionSystem(motor_controller)
     vision_system.start()
-    # ===============================
-    # Register Blueprints
-    # ===============================
+
+    # Store on app.config so gen_frames() can reach it without a circular import
+    app.config["VISION_SYSTEM"] = vision_system
+
+    # ── Blueprints ────────────────────────────────────────────────────────
     app.register_blueprint(
         init_control_routes(motor_controller),
-        url_prefix="/api/control"
+        url_prefix="/api/control",
     )
-    app.register_blueprint(
-        stats_bp,
-        url_prefix="/api/stats"
-    )
+    app.register_blueprint(stats_bp, url_prefix="/api/stats")
 
-    # ===============================
-    #  Video Stream Route
-    # ===============================
+    # ── Routes ────────────────────────────────────────────────────────────
     @app.route("/video_feed")
     def video_feed():
+        vision_system = app.config["VISION_SYSTEM"]
+
         return Response(
-            gen_frames(),
+            gen_frames_direct(vision_system),
             mimetype="multipart/x-mixed-replace; boundary=frame"
         )
 
-    # ===============================
-    # Dashboard
-    # ===============================
     @app.route("/")
     def dashboard():
         return render_template("dashboard.html")
@@ -66,7 +58,7 @@ def create_app():
 
 if __name__ == "__main__":
     app = create_app()
+    CORS(app)
     for rule in app.url_map.iter_rules():
         print(rule)
-    CORS(app)
-    app.run(host="0.0.0.0", port=5000)
+    app.run(host="0.0.0.0", port=5000, threaded=True)
