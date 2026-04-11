@@ -12,13 +12,15 @@ Stack: `Python` · `Flask` · `YOLOv8` · `OpenCV` · `Raspberry Pi` · `SQLite`
 
 The system is organised into four layers: **Acquisition** (camera + conveyor), **Inference** (Raspberry Pi running YOLOv8), **Actuation** (GPIO relay-controlled motors and pusher mechanism), and **Monitoring** (web dashboard with live video, counters, and motor controls).
 
-![High-Level System Architecture](<img width="1264" height="842" alt="image" src="https://github.com/user-attachments/assets/be7faf7b-0608-49c6-890c-1b22cec36500" />)
+![High-Level System Architecture]
+<img width="1264" height="842" alt="image" src="https://github.com/user-attachments/assets/be7faf7b-0608-49c6-890c-1b22cec36500" />
 
 ### Data Flow & Component Interaction
 
 Products on Conveyor Belt 1 pass under the camera. The Raspberry Pi classifies each item using YOLOv8 and triggers control commands via GPIO/Relay. Defective items are diverted to Conveyor Belt 2 (Reject Line). Detection results are stored in the database and surfaced through the REST API and web dashboard.
 
-![Data Flow and Component Interaction](<img width="1024" height="682" alt="image" src="https://github.com/user-attachments/assets/f549c168-0f0c-4de7-b787-00b994403041" />)
+![Data Flow and Component Interaction]
+<img width="1024" height="682" alt="image" src="https://github.com/user-attachments/assets/f549c168-0f0c-4de7-b787-00b994403041" />
 
 ---
 
