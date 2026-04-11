@@ -1,4 +1,4 @@
-from flask import Flask, render_template ,Response
+from flask import Flask, render_template , Response
 from database.db import init_db
 from gpio.controller import MotorController
 from routes.control import init_control_routes
@@ -43,15 +43,17 @@ def create_app():
         stats_bp,
         url_prefix="/api/stats"
     )
+
     # ===============================
     #  Video Stream Route
     # ===============================
     @app.route("/video_feed")
     def video_feed():
         return Response(
-            gen_frames(), 
+            gen_frames(),
             mimetype="multipart/x-mixed-replace; boundary=frame"
         )
+
     # ===============================
     # Dashboard
     # ===============================
@@ -64,5 +66,7 @@ def create_app():
 
 if __name__ == "__main__":
     app = create_app()
+    for rule in app.url_map.iter_rules():
+        print(rule)
     CORS(app)
     app.run(host="0.0.0.0", port=5000)

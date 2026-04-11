@@ -7,6 +7,7 @@ import time
 class MotorController:
 
     def __init__(self):
+        self.stop_event = threading.Event()
         self.lock = threading.Lock()
 
         # ========================
@@ -56,17 +57,23 @@ class MotorController:
             motor["relay"].on()  # trigger relay to turn OFF the motor
 
         return motor["state"]
-
+    
     def emergency_stop(self):
         print("!!! EMERGENCY STOP ACTIVATED !!!")
+
+        self.stop_event.set()  # ⛔ وقف أي thread شغال
+
         for motor in self.motors.values():
             motor["state"] = False
-            motor["relay"].on()  # trigger relay to turn OFF all motors
-        return self.get_status()
+            motor["relay"].on()
 
+        return self.get_status()
+    
     def run_pusher(self, seconds=8):
 
         def worker():
+            if self.stop_event.is_set():
+                return
             with self.lock:
                 motor = self.motors["pusher"]
                 if motor["state"]:
@@ -74,14 +81,29 @@ class MotorController:
                 motor["state"] = True
                 motor["relay"].off()  # trigger relay to turn ON the pusher
 
-            time.sleep(seconds)
+            start_time = time.time()
+            while time.time() - start_time < seconds:
+                if self.stop_event.is_set():
+                    break
+                time.sleep(0.1)
 
             with self.lock:
                 motor["state"] = False
                 motor["relay"].on()  # trigger relay to turn OFF the pusher
 
+        self.stop_event.clear()
         threading.Thread(target=worker, daemon=True).start()
 
+    def stop_pusher(self):
+        with self.lock:
+            motor = self.motors["pusher"]
+            self.stop_event.set()  # ⛔ وقف الثريد
+
+            motor["state"] = False
+            motor["relay"].on()  # OFF
+
+        return motor["state"]
+    
     def get_status(self):
         return {name: motor["state"] for name, motor in self.motors.items()}
 

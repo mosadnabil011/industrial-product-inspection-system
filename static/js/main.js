@@ -165,27 +165,40 @@ async function toggleMotor(typ, toggleTypeBtn) {
 }
 
 
-async function runPusher(button) {
+async function togglePusher(button) {
     button.disabled = true;
-    button.textContent = "RUNNING";
 
     try {
-        await fetch("http://127.0.0.1:5000/api/control/run-pusher", {
-            method: "POST"
-        });
+        const res = await fetch("http://127.0.0.1:5000/api/control/status");
+        const data = await res.json();
 
-        setTimeout(() => {
-            button.disabled = false;
+        if (data.pusher) {
+            // 🔴 شغال → نوقفه
+            await fetch("http://127.0.0.1:5000/api/control/stop-pusher", {
+                method: "POST"
+            });
+
             button.textContent = "RUN PUSHER";
-        }, 8000);
+            button.classList.remove("btn-success");
+            button.classList.add("btn-danger");
+
+        } else {
+            // 🟢 واقف → نشغله
+            await fetch("http://127.0.0.1:5000/api/control/run-pusher", {
+                method: "POST"
+            });
+
+            button.textContent = "STOP PUSHER";
+            button.classList.remove("btn-danger");
+            button.classList.add("btn-success");
+        }
 
     } catch (err) {
         console.error(err);
+    } finally {
         button.disabled = false;
-        button.textContent = "RUN PUSHER";
     }
 }
-
 
 
 

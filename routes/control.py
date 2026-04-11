@@ -33,6 +33,14 @@ def init_control_routes(motor_controller):
             "message": "Pusher started",
             "duration": 8
         }), 200   
+        
+    @control_bp.route("/stop-pusher", methods=["POST"])
+    def stop_pusher():
+        state = motor_controller.stop_pusher()
+        return jsonify({
+            "message": "Pusher stopped",
+            "pusher_motor": state
+        })  , 200
 
     @control_bp.route("/emergency", methods=["POST"])
     def emergency():
