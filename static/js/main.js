@@ -173,7 +173,6 @@ async function togglePusher(button) {
         const data = await res.json();
 
         if (data.pusher) {
-            // 🔴 شغال → نوقفه
             await fetch("http://127.0.0.1:5000/api/control/stop-pusher", {
                 method: "POST"
             });
@@ -183,7 +182,6 @@ async function togglePusher(button) {
             button.classList.add("btn-danger");
 
         } else {
-            // 🟢 واقف → نشغله
             await fetch("http://127.0.0.1:5000/api/control/run-pusher", {
                 method: "POST"
             });
