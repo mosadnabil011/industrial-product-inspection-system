@@ -1,0 +1,8 @@
+flask==2.3.2
+# RPi.GPIO==0.7.1
+ultralytics
+opencv-python-headless
+numpy
+# pandas
+# openpyxl
+# reportlab
