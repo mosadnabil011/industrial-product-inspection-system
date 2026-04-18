@@ -275,11 +275,11 @@ To display the live video stream in the dashboard, add this inside the Live card
 
 ---
 
-## 📄 Project Paper
+## Project Paper
 
-You can find the full graduation project paper here:
+For detailed documentation of the project, please refer to the following:
 
-👉 [Download Paper](docs/paper.pdf)
+- Graduation Project Paper: [docs/paper.pdf](docs/paper.pdf)
 
 ---
 
