@@ -275,7 +275,7 @@ To display the live video stream in the dashboard, add this inside the Live card
 
 ---
 
-## Project Paper
+## 12. Project Paper
 
 For detailed documentation of the project, please refer to the following:
 
@@ -283,6 +283,6 @@ For detailed documentation of the project, please refer to the following:
 
 ---
 
-## 12. License
+## 13. License
 
 This project was developed as a graduation project and is shared for educational purposes. All rights reserved by the authors unless otherwise stated.
