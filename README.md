@@ -12,13 +12,11 @@ Stack: `Python` · `Flask` · `YOLOv8` · `OpenCV` · `Raspberry Pi` · `SQLite`
 
 The system is organised into four layers: **Acquisition** (camera + conveyor), **Inference** (Raspberry Pi running YOLOv8), **Actuation** (GPIO relay-controlled motors and pusher mechanism), and **Monitoring** (web dashboard with live video, counters, and motor controls).
 
-
 <img width="1264" height="842" alt="image" src="https://github.com/user-attachments/assets/be7faf7b-0608-49c6-890c-1b22cec36500" />
 
 ### Data Flow & Component Interaction
 
 Products on Conveyor Belt 1 pass under the camera. The Raspberry Pi classifies each item using YOLOv8 and triggers control commands via GPIO/Relay. Defective items are diverted to Conveyor Belt 2 (Reject Line). Detection results are stored in the database and surfaced through the REST API and web dashboard.
-
 
 <img width="1024" height="682" alt="image" src="https://github.com/user-attachments/assets/f549c168-0f0c-4de7-b787-00b994403041" />
 
@@ -180,26 +178,26 @@ hostname -I
 
 ### 7.1 Motor Control — `/api/control`
 
-| Endpoint | Method | Description |
-|---|---|---|
-| `/api/control/toggle-main` | `POST` | Toggle the main conveyor motor ON/OFF |
-| `/api/control/toggle-bad` | `POST` | Toggle the reject belt motor ON/OFF |
-| `/api/control/run-pusher` | `POST` | Run the pusher motor for 8 seconds |
-| `/api/control/stop-pusher` | `POST` | Stop the pusher motor immediately |
-| `/api/control/emergency` | `POST` | EMERGENCY STOP — stops all motors instantly |
-| `/api/control/status` | `GET` | Returns JSON with current state of all motors |
+| Endpoint                   | Method | Description                                   |
+| -------------------------- | ------ | --------------------------------------------- |
+| `/api/control/toggle-main` | `POST` | Toggle the main conveyor motor ON/OFF         |
+| `/api/control/toggle-bad`  | `POST` | Toggle the reject belt motor ON/OFF           |
+| `/api/control/run-pusher`  | `POST` | Run the pusher motor for 8 seconds            |
+| `/api/control/stop-pusher` | `POST` | Stop the pusher motor immediately             |
+| `/api/control/emergency`   | `POST` | EMERGENCY STOP — stops all motors instantly   |
+| `/api/control/status`      | `GET`  | Returns JSON with current state of all motors |
 
 ### 7.2 Statistics — `/api/stats`
 
-| Endpoint | Method | Description |
-|---|---|---|
-| `/api/stats/summary` | `GET` | Returns total OK, NOT_OK counts and breakdown by colour |
+| Endpoint             | Method | Description                                             |
+| -------------------- | ------ | ------------------------------------------------------- |
+| `/api/stats/summary` | `GET`  | Returns total OK, NOT_OK counts and breakdown by colour |
 
 ### 7.3 Video Stream
 
-| Endpoint | Method | Description |
-|---|---|---|
-| `/video_feed` | `GET` | MJPEG live stream — embed as `<img src="/video_feed" />` |
+| Endpoint      | Method | Description                                              |
+| ------------- | ------ | -------------------------------------------------------- |
+| `/video_feed` | `GET`  | MJPEG live stream — embed as `<img src="/video_feed" />` |
 
 ---
 
@@ -207,12 +205,12 @@ hostname -I
 
 SQLite file: `Production_DB.db` — created automatically on first run.
 
-| Column | Type | Default | Description |
-|---|---|---|---|
-| `id` | INTEGER | AUTOINCREMENT | Primary key |
-| `status` | TEXT | — | YOLO class name (e.g. `OK`, `NOT_OK`) |
-| `color` | TEXT | — | Detected colour (Red, Green, Blue, Yellow, Unknown) |
-| `created_at` | DATETIME | CURRENT_TIMESTAMP | Timestamp of detection |
+| Column       | Type     | Default           | Description                                         |
+| ------------ | -------- | ----------------- | --------------------------------------------------- |
+| `id`         | INTEGER  | AUTOINCREMENT     | Primary key                                         |
+| `status`     | TEXT     | —                 | YOLO class name (e.g. `OK`, `NOT_OK`)               |
+| `color`      | TEXT     | —                 | Detected colour (Red, Green, Blue, Yellow, Unknown) |
+| `created_at` | DATETIME | CURRENT_TIMESTAMP | Timestamp of detection                              |
 
 To seed 50 random rows for testing:
 
@@ -235,7 +233,10 @@ The frontend polls `/api/control/status` and `/api/stats/summary` every 1 second
 To display the live video stream in the dashboard, add this inside the Live card in `dashboard.html`:
 
 ```html
-<img src="/video_feed" style="max-height:100%; max-width:100%; object-fit:contain;" />
+<img
+  src="/video_feed"
+  style="max-height:100%; max-width:100%; object-fit:contain;"
+/>
 ```
 
 ---
@@ -243,19 +244,23 @@ To display the live video stream in the dashboard, add this inside the Live card
 ## 10. Troubleshooting
 
 ### Camera not found
+
 - Check the camera index in `vision/detector.py`: `cv2.VideoCapture(0)`. Try index `1` or `2` if you have multiple cameras.
 - On Raspberry Pi with the CSI camera: `sudo modprobe bcm2835-v4l2`
 
 ### GPIO errors on non-Raspberry Pi machines
+
 - `gpiozero` raises `DeviceNotFoundError` if no GPIO hardware is present.
 - Comment out `MotorController()` in `app.py` and pass a mock object to `VisionSystem` for development without hardware.
 
 ### No video in the browser
+
 - Confirm `/video_feed` returns data: `curl http://localhost:5000/video_feed | head -c 200`
 - Make sure `VISION_SYSTEM` is set on `app.config` (done automatically in `app.py`).
 - Check that the `<img>` tag in `dashboard.html` points to `/video_feed`.
 
 ### `counted_ids` growing indefinitely
+
 - The set is capped at `MAX_TRACKED_IDS = 500` in `vision/detector.py` and clears automatically when that limit is reached.
 
 ---
@@ -267,6 +272,14 @@ To display the live video stream in the dashboard, add this inside the Live card
 - SQLite is single-writer; under very high detection rates a queue should buffer DB inserts.
 - The MJPEG stream uses ~30 fps polling; adaptive frame rate based on CPU load would improve performance.
 - No authentication on the API — consider adding Flask-Login before deploying on a network.
+
+---
+
+## 📄 Project Paper
+
+You can find the full graduation project paper here:
+
+👉 [Download Paper](docs/paper.pdf)
 
 ---
 
