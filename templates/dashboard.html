@@ -184,22 +184,27 @@
         <div class="row g-4">
           <div class="col-lg-12">
             <div class="card p-3 w-auto" style="height:200px;">
-              <h4 class="fs-6"> 1</h4>
+             <!-- Line Chart -->
+    <canvas id="lineChart"></canvas>
+
             </div>
           </div>
           <div class="col-lg-12">
-            <div class="card p-3 " style="height:200px;">
-              <h4 class="fs-6"> 2</h4>
-            </div>
+           <!-- Bar Chart -->
+    <div class="card p-3" style="height:200px;">
+      <canvas id="barChart"></canvas>
+    </div>
           </div>
         </div>
       </div>
 
-      <div class="col-lg-3">
-        <div class="card p-3 " style="height:420px;">
-          <h4 class="fs-6">3</h4>
-        </div>
-      </div>
+       <!-- RIGHT SIDE (Pie) -->
+  <div class="col-lg-3">
+    <div class="card p-3 h-100">
+      <canvas id="pieChart"></canvas>
+    </div>
+  </div>
+
     </div>
   </div>
   <!-- report -->
@@ -215,8 +220,9 @@
                   />
                 </div>
                 <div class="col-md-2">
-                  <button class="btn btn-success w-100">Print</button>
-                </div>
+<button class="btn btn-success w-100" onclick="generateReport()">
+  Print
+</button>                </div>
               </div>
             </div>
           </section>
@@ -239,6 +245,7 @@
       integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
       crossorigin="anonymous"
     ></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="../static/js/main.js"></script>
   </body>
 </html>

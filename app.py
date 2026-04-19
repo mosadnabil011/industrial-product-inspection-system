@@ -7,7 +7,7 @@ import logging
 from vision.detector import VisionSystem
 from flask_cors import CORS
 from vision.stream import gen_frames_direct
-
+from routes.report import report_bp 
 logging.basicConfig(level=logging.INFO)
 
 
@@ -38,6 +38,8 @@ def create_app():
         url_prefix="/api/control",
     )
     app.register_blueprint(stats_bp, url_prefix="/api/stats")
+
+    app.register_blueprint(report_bp, url_prefix="/api")
 
     # ── Routes ────────────────────────────────────────────────────────────
     @app.route("/video_feed")

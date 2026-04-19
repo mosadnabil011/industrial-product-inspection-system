@@ -1,7 +1,8 @@
 // ==================== THEME TOGGLE ====================
 const toggleBtn = document.getElementById("themeToggleBtn");
 const icon = document.getElementById("themeIcon");
-
+let lastOk = null;
+let lastNotOk = null;
 if (localStorage.getItem("theme")) {
     document.body.className = localStorage.getItem("theme");
     updateIcon();
@@ -110,24 +111,92 @@ function updateButton(btn, state) {
 }
 
 // ==================== FETCH BOXES ====================
+// async function fetchBoxes() {
+//     try {
+//         const res = await fetch("http://127.0.0.1:5000/api/stats/summary");
+//         const data = await res.json();
+//         console.log("Boxes API response:", data);
+
+//         const ok = data.ok || 0;
+//         const notOk = data.not_ok || 0;
+//         const total = ok + notOk;
+
+//         if (TBoxes) TBoxes.textContent = total;
+//         if (VBoxes) VBoxes.textContent = ok;
+//         if (IVBoxes) IVBoxes.textContent = notOk;
+//         if (DR) DR.textContent = total > 0 ? ((notOk / total) * 100).toFixed(1) + "%" : "0%";
+
+//     } catch (e) {
+//         console.error("Fetch boxes data failed:", e);
+//         showErrorToast("Error fetching boxes data!");
+//     }
+// }
+
+
+let timeIndex = 0;
+
 async function fetchBoxes() {
     try {
         const res = await fetch("http://127.0.0.1:5000/api/stats/summary");
         const data = await res.json();
-        console.log("Boxes API response:", data);
 
         const ok = data.ok || 0;
         const notOk = data.not_ok || 0;
         const total = ok + notOk;
 
-        if (TBoxes) TBoxes.textContent = total;
-        if (VBoxes) VBoxes.textContent = ok;
-        if (IVBoxes) IVBoxes.textContent = notOk;
-        if (DR) DR.textContent = total > 0 ? ((notOk / total) * 100).toFixed(1) + "%" : "0%";
+        // UI
+        TBoxes.textContent = total;
+        VBoxes.textContent = ok;
+        IVBoxes.textContent = notOk;
+        DR.textContent = total > 0 ? ((notOk / total) * 100).toFixed(1) + "%" : "0%";
+
+        // ================= Charts Update =================
+
+        // Pie + Bar
+        pieChart.data.datasets[0].data = [ok, notOk];
+        barChart.data.datasets[0].data = [ok, notOk];
+
+        pieChart.update();
+        barChart.update();
+
+        // Line (تاريخ)
+        // timeIndex++;
+
+        // lineChart.data.labels.push(timeIndex);
+        // lineChart.data.datasets[0].data.push(ok);
+        // lineChart.data.datasets[1].data.push(notOk);
+
+        // // عشان ميكبرش قوي
+        // if (lineChart.data.labels.length > 20) {
+        //     lineChart.data.labels.shift();
+        //     lineChart.data.datasets[0].data.shift();
+        //     lineChart.data.datasets[1].data.shift();
+        // }
+
+        // lineChart.update();
+
+        if (ok !== lastOk || notOk !== lastNotOk) {
+
+            timeIndex++;
+
+            lineChart.data.labels.push(timeIndex);
+            lineChart.data.datasets[0].data.push(ok);
+            lineChart.data.datasets[1].data.push(notOk);
+
+            if (lineChart.data.labels.length > 20) {
+                lineChart.data.labels.shift();
+                lineChart.data.datasets[0].data.shift();
+                lineChart.data.datasets[1].data.shift();
+            }
+
+            lineChart.update();
+
+            lastOk = ok;
+            lastNotOk = notOk;
+        }
 
     } catch (e) {
         console.error("Fetch boxes data failed:", e);
-        showErrorToast("Error fetching boxes data!");
     }
 }
 
@@ -224,6 +293,74 @@ async function emergencyStop() {
     } finally {
         emergencyBtn.disabled = false;
     }
+}
+
+// ==================== CHARTS ====================
+
+// Line (زي البورصة)
+const lineCtx = document.getElementById('lineChart');
+const lineChart = new Chart(lineCtx, {
+    type: 'line',
+    data: {
+        labels: [],
+        datasets: [
+            {
+                label: 'Valid',
+                data: [],
+                borderColor: 'green',
+                tension: 0.3
+            },
+            {
+                label: 'Invalid',
+                data: [],
+                borderColor: 'red',
+                tension: 0.3
+            }
+        ],
+        options: {
+            animation: false
+        }
+    }
+});
+
+// Bar Chart
+const barCtx = document.getElementById('barChart');
+const barChart = new Chart(barCtx, {
+    type: 'bar',
+    data: {
+        labels: ['Valid', 'Invalid'],
+        datasets: [{
+            data: [0, 0],
+            backgroundColor: ['green', 'red']
+        }]
+    }
+});
+
+// Pie / Doughnut
+const pieCtx = document.getElementById('pieChart');
+const pieChart = new Chart(pieCtx, {
+    type: 'doughnut',
+    data: {
+        labels: ['Valid', 'Invalid'],
+        datasets: [{
+            data: [0, 0],
+            backgroundColor: ['green', 'red']
+        }]
+    }
+});
+
+
+
+async function generateReport() {
+    const date = document.getElementById("reportDate").value;
+
+    if (!date) {
+        alert("Please select a date");
+        return;
+    }
+
+    // فتح PDF في تاب جديدة
+    window.open(`http://127.0.0.1:5000/api/report?date=${date}`, "_blank");
 }
 // ==================== INIT ====================
 fetchLineState();
