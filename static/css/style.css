@@ -194,3 +194,15 @@ body .card {
   overflow-x: hidden;
   white-space: nowrap;
 }
+
+card {
+  background: #f5f6fa;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+}
+
+h2,
+h3,
+h5 {
+  color: #2c3e50;
+}

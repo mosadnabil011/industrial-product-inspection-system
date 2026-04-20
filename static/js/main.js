@@ -28,6 +28,141 @@ function updateIcon() {
         icon.classList.add("fa-sun");
     }
 }
+///////////
+const lineCtx = document.getElementById('lineChart');
+const barCtx = document.getElementById('barChart');
+const pieCtx = document.getElementById('pieChart');
+
+const colorGood = '#1abc9c';
+const colorBad = '#ffaf32';
+// LINE
+
+const lineChart = new Chart(lineCtx, {
+    type: 'line',
+    data: {
+        labels: [],
+        datasets: [
+            {
+                label: 'Valid',
+                data: [],
+                borderColor: colorGood,
+                tension: 0.3
+            },
+            {
+                label: 'Invalid',
+                data: [],
+                borderColor: colorBad,
+                tension: 0.3
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: { display: true }
+        },
+        scales: {
+            y: { beginAtZero: true }
+        }
+    }
+});
+// pie
+const pieChart = new Chart(pieCtx, {
+    type: 'doughnut',
+    data: {
+        labels: ['Valid', 'Invalid'],
+        datasets: [{
+            data: [0, 0],
+            backgroundColor: [colorGood, colorBad]
+        }]
+    },
+    options: {
+        cutout: '0%',
+        plugins: {
+            legend: {
+                position: 'bottom'
+            }
+        }
+    },
+    plugins: [{
+        id: 'percentText',
+        afterDraw(chart) {
+            const { ctx, chartArea } = chart;
+            const data = chart.data.datasets[0].data;
+
+            const total = data.reduce((a, b) => a + b, 0);
+
+            if (total === 0) return;
+
+            const meta = chart.getDatasetMeta(0);
+
+            ctx.save();
+            ctx.font = "bold 14px sans-serif";
+            ctx.textAlign = "center";
+            ctx.fillStyle = "#fff";
+
+            meta.data.forEach((arc, index) => {
+                const value = data[index];
+                if (!value) return;
+
+                const percent = ((value / total) * 100).toFixed(1) + "%";
+
+                const pos = arc.tooltipPosition();
+
+                ctx.fillText(percent, pos.x, pos.y);
+            });
+
+            ctx.restore();
+        }
+    }]
+});
+
+// BAR
+const barChart = new Chart(barCtx, {
+    type: 'bar',
+    data: {
+        labels: ['Valid', 'Invalid'],
+        datasets: [{
+            data: [0, 0],
+            backgroundColor: [colorGood, colorBad],
+            borderRadius: 8
+        }]
+    },
+    options: {
+        plugins: {
+            legend: { display: false }
+        },
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        }
+    },
+    plugins: [{
+        id: 'labelPlugin',
+        afterDatasetsDraw(chart) {
+            const { ctx } = chart;
+            chart.data.datasets.forEach((dataset, i) => {
+                const meta = chart.getDatasetMeta(i);
+                meta.data.forEach((bar, index) => {
+                    const value = dataset.data[index];
+                    ctx.fillStyle = "#000";
+                    ctx.font = "bold 14px sans-serif";
+                    ctx.textAlign = "center";
+                    ctx.fillText(value, bar.x, bar.y - 5);
+                });
+            });
+        }
+    }]
+});
+
+function updateCharts(ok, notOk) {
+    pieChart.data.datasets[0].data = [ok, notOk];
+    pieChart.update();
+
+    barChart.data.datasets[0].data = [ok, notOk];
+    barChart.update();
+}
 
 // ==================== SIDEBAR COLLAPSE ====================
 const btnCollapse = document.getElementById("btnCollapse");
@@ -153,20 +288,19 @@ async function fetchBoxes() {
         // ================= Charts Update =================
 
         // Pie + Bar
-        pieChart.data.datasets[0].data = [ok, notOk];
-        barChart.data.datasets[0].data = [ok, notOk];
+        // pieChart.data.datasets[0].data = [ok, notOk];
+        // barChart.data.datasets[0].data = [ok, notOk];
 
-        pieChart.update();
-        barChart.update();
+        // pieChart.update();
+        // barChart.update();
+        updateCharts(ok, notOk);
 
-        // Line (تاريخ)
         // timeIndex++;
 
         // lineChart.data.labels.push(timeIndex);
         // lineChart.data.datasets[0].data.push(ok);
         // lineChart.data.datasets[1].data.push(notOk);
 
-        // // عشان ميكبرش قوي
         // if (lineChart.data.labels.length > 20) {
         //     lineChart.data.labels.shift();
         //     lineChart.data.datasets[0].data.shift();
@@ -175,7 +309,7 @@ async function fetchBoxes() {
 
         // lineChart.update();
 
-        if (ok !== lastOk || notOk !== lastNotOk) {
+        if (lastOk === null || ok !== lastOk || notOk !== lastNotOk) {
 
             timeIndex++;
 
@@ -296,59 +430,6 @@ async function emergencyStop() {
 }
 
 // ==================== CHARTS ====================
-
-// Line (زي البورصة)
-const lineCtx = document.getElementById('lineChart');
-const lineChart = new Chart(lineCtx, {
-    type: 'line',
-    data: {
-        labels: [],
-        datasets: [
-            {
-                label: 'Valid',
-                data: [],
-                borderColor: 'green',
-                tension: 0.3
-            },
-            {
-                label: 'Invalid',
-                data: [],
-                borderColor: 'red',
-                tension: 0.3
-            }
-        ],
-        options: {
-            animation: false
-        }
-    }
-});
-
-// Bar Chart
-const barCtx = document.getElementById('barChart');
-const barChart = new Chart(barCtx, {
-    type: 'bar',
-    data: {
-        labels: ['Valid', 'Invalid'],
-        datasets: [{
-            data: [0, 0],
-            backgroundColor: ['green', 'red']
-        }]
-    }
-});
-
-// Pie / Doughnut
-const pieCtx = document.getElementById('pieChart');
-const pieChart = new Chart(pieCtx, {
-    type: 'doughnut',
-    data: {
-        labels: ['Valid', 'Invalid'],
-        datasets: [{
-            data: [0, 0],
-            backgroundColor: ['green', 'red']
-        }]
-    }
-});
-
 
 
 async function generateReport() {

@@ -15,16 +15,14 @@ import os
 from datetime import datetime
 
 report_bp = Blueprint("report", __name__)
-colorGood = "#1abc9c";
-colorBad = "#ffaf32";  
 
 # ─── Brand Colors ──────────────────────────────────────────────────────────
 DARK_BLUE = colors.HexColor("#0D1B2A")
 MID_BLUE = colors.HexColor("#1B4F72")
 ACCENT_BLUE = colors.HexColor("#2E86C1")
 LIGHT_GRAY = colors.HexColor("#F2F4F7")
-GREEN = colors.HexColor(colorGood)
-RED = colors.HexColor(colorBad)
+GREEN = colors.HexColor("#1E8449")
+RED = colors.HexColor("#C0392B")
 WHITE = colors.white
 TEXT_DARK = colors.HexColor("#1A1A2E")
 
@@ -90,7 +88,7 @@ def make_pie(ok, not_ok, path):
     wedges, texts, autotexts = ax.pie(
         vals, labels=None, autopct="%1.1f%%",
         startangle=90, wedgeprops=wedge_props,
-        colors=[colorGood, colorBad], pctdistance=0.75,
+        colors=["#1E8449", "#C0392B"], pctdistance=0.75,
     )
     for at in autotexts:
         at.set_color("white")
@@ -98,8 +96,8 @@ def make_pie(ok, not_ok, path):
         at.set_fontweight("bold")
     ax.set_title("Quality Distribution", fontsize=13, fontweight="bold", pad=14)
     patches = [
-        mpatches.Patch(color=colorGood, label=f"Valid  ({ok})"),
-        mpatches.Patch(color=colorBad, label=f"Invalid ({not_ok})"),
+        mpatches.Patch(color="#1E8449", label=f"Valid  ({ok})"),
+        mpatches.Patch(color="#C0392B", label=f"Invalid ({not_ok})"),
     ]
     ax.legend(handles=patches, loc="lower center",
               bbox_to_anchor=(0.5, -0.08), ncol=2, frameon=False, fontsize=10)
@@ -111,7 +109,7 @@ def make_pie(ok, not_ok, path):
 def make_bar(ok, not_ok, path):
     fig, ax = plt.subplots(figsize=(5, 3.5), facecolor="white")
     bars = ax.bar(["Valid", "Invalid"], [ok, not_ok],
-                  color=[colorGood, colorBad], width=0.45,
+                  color=["#1E8449", "#C0392B"], width=0.45,
                   edgecolor="white", linewidth=1.2)
     for bar, val in zip(bars, [ok, not_ok]):
         ax.text(bar.get_x() + bar.get_width() / 2,
@@ -135,6 +133,7 @@ def generate_report():
     db = get_db()
     cursor = db.cursor()
 
+    # ✅ FIX: جرب الـ query بدون DATE() لو التواريخ مش بـ ISO format
     cursor.execute("""
         SELECT status, created_at
         FROM products
@@ -210,15 +209,16 @@ def generate_report():
                                color=ACCENT_BLUE, spaceAfter=14))
 
     # ── KPI Cards ──
-
+    # ✅ FIX: خلينا نعمل كل cell كـ Paragraph واحدة بدل nested list
+    # عشان الـ font color يظهر صح
     content.append(Paragraph("Key Performance Indicators", style_section))
 
     kpi_items = [
         ("Total Units", str(total), "#0D1B2A"),
-        ("Valid Units", str(ok), colorGood),
-        ("Invalid Units", str(not_ok), colorBad),
-        ("Pass Rate", f"{pass_rate:.1f}%", colorGood),
-        ("Defect Rate", f"{defect_rate:.1f}%", colorBad),
+        ("Valid Units", str(ok), "#1E8449"),
+        ("Invalid Units", str(not_ok), "#C0392B"),
+        ("Pass Rate", f"{pass_rate:.1f}%", "#1E8449"),
+        ("Defect Rate", f"{defect_rate:.1f}%", "#C0392B"),
     ]
 
     kpi_row = []
