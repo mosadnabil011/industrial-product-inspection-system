@@ -206,3 +206,29 @@ h3,
 h5 {
   color: #2c3e50;
 }
+.chart-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.chart-wrapper {
+  height: 350px; /* مهم جدًا */
+}
+
+.chart-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.chart-scroll {
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.chart-scroll canvas {
+  min-width: 800px;
+  height: 400px !important;
+}

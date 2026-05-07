@@ -18,7 +18,8 @@ class MotorController:
             "bad": {"relay_pin": 24, "button_pin": 27, "state": False},
             "pusher": {"relay_pin": 25, "button_pin": None, "state": False},
         }
-
+        
+        self.start_button_pin = 21
         self.emergency_button_pin = 22
 
         # ========================
@@ -38,7 +39,9 @@ class MotorController:
         # emergency button
         self.emergency_button = Button(self.emergency_button_pin)
         self.emergency_button.when_pressed = self.emergency_stop
-
+        # start button
+        self.start_button = Button(self.start_button_pin)
+        self.start_button.when_pressed = self.start_system
     # ========================
     # Dynamic Methods
     # ========================
@@ -57,17 +60,38 @@ class MotorController:
             motor["relay"].on()  # trigger relay to turn OFF the motor
 
         return motor["state"]
-    
+
+    # ========================
+    # EMERGENCY STOP
+    # ========================
     def emergency_stop(self):
         print("!!! EMERGENCY STOP ACTIVATED !!!")
 
-        self.stop_event.set()  # ⛔ وقف أي thread شغال
+        self.stop_event.set()  
 
         for motor in self.motors.values():
             motor["state"] = False
             motor["relay"].on()
 
         return self.get_status()
+    
+    # ========================
+    # START SYSTEM
+    # ========================
+    
+    def start_system(self):
+
+        print("SYSTEM STARTED")
+
+        self.stop_event.clear()
+
+        # turn on main
+        self.motors["main"]["state"] = True
+        self.motors["main"]["relay"].off()
+
+        # turn on bad
+        self.motors["bad"]["state"] = True
+        self.motors["bad"]["relay"].off()
     
     def run_pusher(self, seconds=8):
 
@@ -97,7 +121,7 @@ class MotorController:
     def stop_pusher(self):
         with self.lock:
             motor = self.motors["pusher"]
-            self.stop_event.set()  # ⛔ وقف الثريد
+            self.stop_event.set()  
 
             motor["state"] = False
             motor["relay"].on()  # OFF

@@ -107,21 +107,87 @@ def make_pie(ok, not_ok, path):
     plt.savefig(path, dpi=150, bbox_inches="tight")
     plt.close()
 
+# def make_bar(ok, not_ok, path):
+#     fig, ax = plt.subplots(figsize=(5, 3.5), facecolor="white")
+#     bars = ax.bar(["Valid", "Invalid"], [ok, not_ok],
+#                   color=[colorGood, colorBad], width=0.45,
+#                   edgecolor="white", linewidth=1.2)
+#     for bar, val in zip(bars, [ok, not_ok]):
+#         ax.text(bar.get_x() + bar.get_width() / 2,
+#                 bar.get_height() + 0.3, str(val),
+#                 ha="center", va="bottom", fontweight="bold", fontsize=12)
+#     ax.set_title("Box Status Count", fontsize=13, fontweight="bold", pad=10)
+#     ax.set_ylabel("Units", fontsize=10)
+#     ax.spines[["top", "right"]].set_visible(False)
+#     ax.yaxis.grid(True, linestyle="--", alpha=0.4)
+#     ax.set_axisbelow(True)
+#     plt.tight_layout()
+#     plt.savefig(path, dpi=150, bbox_inches="tight")
+#     plt.close()
 
-def make_bar(ok, not_ok, path):
-    fig, ax = plt.subplots(figsize=(5, 3.5), facecolor="white")
-    bars = ax.bar(["Valid", "Invalid"], [ok, not_ok],
-                  color=[colorGood, colorBad], width=0.45,
-                  edgecolor="white", linewidth=1.2)
-    for bar, val in zip(bars, [ok, not_ok]):
-        ax.text(bar.get_x() + bar.get_width() / 2,
-                bar.get_height() + 0.3, str(val),
-                ha="center", va="bottom", fontweight="bold", fontsize=12)
-    ax.set_title("Box Status Count", fontsize=13, fontweight="bold", pad=10)
-    ax.set_ylabel("Units", fontsize=10)
+
+def make_bar(months, ok_data, not_ok_data, path):
+    fig, ax = plt.subplots(figsize=(8, 4.5), facecolor="white")
+
+    x = range(len(months))
+    width = 0.35
+
+    bars1 = ax.bar(
+        [i - width / 2 for i in x],
+        ok_data,
+        width=width,
+        label="Valid",
+        color=colorGood
+    )
+
+    bars2 = ax.bar(
+        [i + width / 2 for i in x],
+        not_ok_data,
+        width=width,
+        label="Invalid",
+        color=colorBad
+    )
+
+    # كتابة الأرقام فوق الأعمدة
+    for bars in [bars1, bars2]:
+        for bar in bars:
+            height = bar.get_height()
+            ax.text(
+                bar.get_x() + bar.get_width() / 2,
+                height + 0.2,
+                str(int(height)),
+                ha='center',
+                va='bottom',
+                fontsize=9,
+                fontweight='bold'
+            )
+
+    # أسماء الشهور
+    month_names = [
+        "Jan", "Feb", "Mar", "Apr",
+        "May", "Jun", "Jul", "Aug",
+        "Sep", "Oct", "Nov", "Dec"
+    ]
+
+    labels = [month_names[int(m) - 1] for m in months]
+
+    ax.set_xticks(list(x))
+    ax.set_xticklabels(labels)
+
+    ax.set_title("Monthly Production Statistics",
+                 fontsize=14,
+                 fontweight="bold",
+                 pad=12)
+
+    ax.set_ylabel("Units")
+
+    ax.legend()
+
     ax.spines[["top", "right"]].set_visible(False)
+
     ax.yaxis.grid(True, linestyle="--", alpha=0.4)
     ax.set_axisbelow(True)
+
     plt.tight_layout()
     plt.savefig(path, dpi=150, bbox_inches="tight")
     plt.close()
@@ -135,18 +201,46 @@ def generate_report():
     db = get_db()
     cursor = db.cursor()
 
+    # cursor.execute("""
+    #     SELECT status, created_at
+    #     FROM products
+    #     WHERE created_at >= ?
+    # """, (date,))
+
+    # rows = cursor.fetchall()
+
     cursor.execute("""
-        SELECT status, created_at
+        SELECT 
+            strftime('%m', created_at) as month,
+            COALESCE(SUM(CASE WHEN status='OK' THEN 1 ELSE 0 END), 0) as ok,
+            COALESCE(SUM(CASE WHEN status='NOT_OK' THEN 1 ELSE 0 END), 0) as not_ok
         FROM products
         WHERE created_at >= ?
+        GROUP BY month
+        ORDER BY month
     """, (date,))
 
     rows = cursor.fetchall()
+
+    months = []
+    ok_data = []
+    not_ok_data = []
+
+    for row in rows:
+        months.append(row[0])
+        ok_data.append(row[1])
+        not_ok_data.append(row[2])
+        
     db.close()
 
-    ok = sum(1 for r in rows if r[0] == "OK")
-    not_ok = sum(1 for r in rows if r[0] == "NOT_OK")
-    total = len(rows)
+    # ok = sum(1 for r in rows if r[0] == "OK")
+    # not_ok = sum(1 for r in rows if r[0] == "NOT_OK")
+    # total = len(rows)
+    
+    ok = sum(ok_data)
+    not_ok = sum(not_ok_data)
+    total = ok + not_ok
+    
     defect_rate = (not_ok / total * 100) if total else 0
     pass_rate = (ok / total * 100) if total else 0
 
@@ -154,7 +248,8 @@ def generate_report():
     pie_path = "/tmp/force_pie.png"
     bar_path = "/tmp/force_bar.png"
     make_pie(ok, not_ok, pie_path)
-    make_bar(ok, not_ok, bar_path)
+    # make_bar(ok, not_ok, bar_path)
+    make_bar(months, ok_data, not_ok_data, bar_path)
 
     # PDF setup
     buffer = io.BytesIO()

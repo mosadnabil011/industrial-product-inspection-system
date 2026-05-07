@@ -1,8 +1,9 @@
+const api_url = "http://127.0.0.1:5000";
 // ==================== THEME TOGGLE ====================
 const toggleBtn = document.getElementById("themeToggleBtn");
 const icon = document.getElementById("themeIcon");
-let lastOk = null;
-let lastNotOk = null;
+// let lastOk = null;
+// let lastNotOk = null;
 if (localStorage.getItem("theme")) {
     document.body.className = localStorage.getItem("theme");
     updateIcon();
@@ -57,7 +58,7 @@ const lineChart = new Chart(lineCtx, {
         ]
     },
     options: {
-        responsive: true,
+        responsive: false,
         plugins: {
             legend: { display: true }
         },
@@ -118,50 +119,81 @@ const pieChart = new Chart(pieCtx, {
 });
 
 // BAR
+// const barChart = new Chart(barCtx, {
+//     type: 'bar',
+//     data: {
+//         labels: ['Valid', 'Invalid'],
+//         datasets: [{
+//             data: [0, 0],
+//             backgroundColor: [colorGood, colorBad],
+//             borderRadius: 8
+//         }]
+//     },
+//     options: {
+//         plugins: {
+//             legend: { display: false }
+//         },
+//         scales: {
+//             y: {
+//                 beginAtZero: true
+//             }
+//         }
+//     },
+//     plugins: [{
+//         id: 'labelPlugin',
+//         afterDatasetsDraw(chart) {
+//             const { ctx } = chart;
+//             chart.data.datasets.forEach((dataset, i) => {
+//                 const meta = chart.getDatasetMeta(i);
+//                 meta.data.forEach((bar, index) => {
+//                     const value = dataset.data[index];
+//                     ctx.fillStyle = "#000";
+//                     ctx.font = "bold 14px sans-serif";
+//                     ctx.textAlign = "center";
+//                     ctx.fillText(value, bar.x, bar.y - 5);
+//                 });
+//             });
+//         }
+//     }]
+// });
 const barChart = new Chart(barCtx, {
     type: 'bar',
     data: {
-        labels: ['Valid', 'Invalid'],
-        datasets: [{
-            data: [0, 0],
-            backgroundColor: [colorGood, colorBad],
-            borderRadius: 8
-        }]
+        labels: [],
+
+        datasets: [
+            {
+                label: 'Valid',
+                data: [],
+                backgroundColor: colorGood,
+                borderRadius: 8,
+                barThickness: 'flex'
+            },
+            {
+                label: 'Invalid',
+                data: [],
+                backgroundColor: colorBad,
+                borderRadius: 8,
+                barThickness: 'flex'
+            }
+        ]
     },
     options: {
         plugins: {
-            legend: { display: false }
+            legend: { display: true }
         },
         scales: {
             y: {
                 beginAtZero: true
             }
         }
-    },
-    plugins: [{
-        id: 'labelPlugin',
-        afterDatasetsDraw(chart) {
-            const { ctx } = chart;
-            chart.data.datasets.forEach((dataset, i) => {
-                const meta = chart.getDatasetMeta(i);
-                meta.data.forEach((bar, index) => {
-                    const value = dataset.data[index];
-                    ctx.fillStyle = "#000";
-                    ctx.font = "bold 14px sans-serif";
-                    ctx.textAlign = "center";
-                    ctx.fillText(value, bar.x, bar.y - 5);
-                });
-            });
-        }
-    }]
+    }
 });
-
 function updateCharts(ok, notOk) {
     pieChart.data.datasets[0].data = [ok, notOk];
     pieChart.update();
 
-    barChart.data.datasets[0].data = [ok, notOk];
-    barChart.update();
+
 }
 
 // ==================== SIDEBAR COLLAPSE ====================
@@ -203,7 +235,7 @@ function showErrorToast(msg) {
 // ==================== FETCH LINE STATUS ====================
 async function fetchLineState() {
     try {
-        const res = await fetch("http://127.0.0.1:5000/api/control/status");
+        const res = await fetch(`${api_url}/api/control/status`);
         const data = await res.json();
         console.log("Line API response:", data);
 
@@ -248,7 +280,7 @@ function updateButton(btn, state) {
 // ==================== FETCH BOXES ====================
 // async function fetchBoxes() {
 //     try {
-//         const res = await fetch("http://127.0.0.1:5000/api/stats/summary");
+//         const res = await fetch(`${api_url}/api/stats/summary`);
 //         const data = await res.json();
 //         console.log("Boxes API response:", data);
 
@@ -268,11 +300,11 @@ function updateButton(btn, state) {
 // }
 
 
-let timeIndex = 0;
+// let timeIndex = 0;
 
 async function fetchBoxes() {
     try {
-        const res = await fetch("http://127.0.0.1:5000/api/stats/summary");
+        const res = await fetch(`${api_url}/api/stats/summary`);
         const data = await res.json();
 
         const ok = data.ok || 0;
@@ -308,32 +340,75 @@ async function fetchBoxes() {
         // }
 
         // lineChart.update();
+        //last
+        // if (lastOk === null || ok !== lastOk || notOk !== lastNotOk) {
 
-        if (lastOk === null || ok !== lastOk || notOk !== lastNotOk) {
+        //     /* The above code is incrementing the value of the variable `timeIndex` by 1. */
+        //     timeIndex++;
 
-            timeIndex++;
+        //     lineChart.data.labels.push(timeIndex);
+        //     lineChart.data.datasets[0].data.push(ok);
+        //     lineChart.data.datasets[1].data.push(notOk);
 
-            lineChart.data.labels.push(timeIndex);
-            lineChart.data.datasets[0].data.push(ok);
-            lineChart.data.datasets[1].data.push(notOk);
+        //     if (lineChart.data.labels.length > 50) {
+        //         lineChart.data.labels.shift();
+        //         lineChart.data.datasets[0].data.shift();
+        //         lineChart.data.datasets[1].data.shift();
+        //     }
 
-            if (lineChart.data.labels.length > 20) {
-                lineChart.data.labels.shift();
-                lineChart.data.datasets[0].data.shift();
-                lineChart.data.datasets[1].data.shift();
-            }
-
-            lineChart.update();
-
-            lastOk = ok;
-            lastNotOk = notOk;
-        }
+        //     lineChart.update();
+        //     lineCtx.style.width = `${lineChart.data.labels.length * 80}px`;
+        //     lastOk = ok;
+        //     lastNotOk = notOk;
+        // }
 
     } catch (e) {
         console.error("Fetch boxes data failed:", e);
     }
 }
 
+async function fetchWeekly() {
+    try {
+
+        const res = await fetch(`${api_url}/api/stats/weekly`);
+        const data = await res.json();
+
+        if (!data.weeks || !data.valid || !data.invalid) return;
+
+        lineChart.data.labels = data.weeks;
+
+        lineChart.data.datasets[0].data = data.valid;
+        lineChart.data.datasets[1].data = data.invalid;
+
+        lineChart.update();
+
+        // Scroll Width
+        lineCtx.style.width = `${data.weeks.length * 120}px`;
+
+    } catch (e) {
+        console.error("Weekly fetch error:", e);
+    }
+}
+async function fetchMonthly() {
+    try {
+        const res = await fetch(`${api_url}/api/stats/monthly`);
+        const data = await res.json();
+
+        if (!data.months || !data.valid || !data.invalid) return;
+
+        const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+        barChart.data.labels = data.months.map(m => monthNames[parseInt(m) - 1]);
+        barChart.data.datasets[0].data = data.valid;
+        barChart.data.datasets[1].data = data.invalid;
+
+        barChart.update();
+        barCtx.style.width = `${data.months.length * 120}px`;
+
+    } catch (e) {
+        console.error("Monthly fetch error:", e);
+    }
+}
 // ==================== TOGGLE FUNCTIONS ====================
 
 
@@ -343,7 +418,7 @@ const togglePusherBtn = document.getElementById('togglePusherBtn');
 async function toggleMotor(typ, toggleTypeBtn) {
     toggleTypeBtn.disabled = true;
     try {
-        const response = await fetch(`http://127.0.0.1:5000/api/control/toggle-${typ}`, {
+        const response = await fetch(`${api_url}/api/control/toggle-${typ}`, {
             method: 'POST',
         });
         const data = await response.json();
@@ -372,11 +447,11 @@ async function togglePusher(button) {
     button.disabled = true;
 
     try {
-        const res = await fetch("http://127.0.0.1:5000/api/control/status");
+        const res = await fetch(`${api_url}/api/control/status`);
         const data = await res.json();
 
         if (data.pusher) {
-            await fetch("http://127.0.0.1:5000/api/control/stop-pusher", {
+            await fetch(`${api_url}/api/control/stop-pusher`, {
                 method: "POST"
             });
 
@@ -385,7 +460,7 @@ async function togglePusher(button) {
             button.classList.add("btn-danger");
 
         } else {
-            await fetch("http://127.0.0.1:5000/api/control/run-pusher", {
+            await fetch(`${api_url}/api/control/run-pusher`, {
                 method: "POST"
             });
 
@@ -406,7 +481,7 @@ async function togglePusher(button) {
 async function emergencyStop() {
     emergencyBtn.disabled = true;
     try {
-        const response = await fetch("http://127.0.0.1:5000/api/control/emergency", {
+        const response = await fetch(`${api_url}/api/control/emergency`, {
             method: 'POST',
         });
         const data = await response.json();
@@ -441,10 +516,14 @@ async function generateReport() {
     }
 
     // فتح PDF في تاب جديدة
-    window.open(`http://127.0.0.1:5000/api/report?date=${date}`, "_blank");
+    window.open(`${api_url}/api/report?date=${date}`, "_blank");
 }
 // ==================== INIT ====================
 fetchLineState();
 fetchBoxes();
+fetchMonthly();
+fetchWeekly();
 setInterval(fetchLineState, 1000);
 setInterval(fetchBoxes, 1000);
+setInterval(fetchMonthly, 60000);
+setInterval(fetchWeekly, 300000);

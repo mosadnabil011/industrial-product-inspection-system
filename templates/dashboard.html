@@ -183,25 +183,29 @@
       <div class="col-lg-9">
         <div class="row g-4">
           <div class="col-lg-12">
-            <div class="card p-3 w-auto" style="height:200px;">
-             <!-- Line Chart -->
+            <div class="card p-3 chart-wrapper">
+  <div class="chart-container chart-scroll">
     <canvas id="lineChart"></canvas>
-
-            </div>
+  </div>
+</div>
           </div>
           <div class="col-lg-12">
            <!-- Bar Chart -->
-    <div class="card p-3" style="height:200px;">
-      <canvas id="barChart"></canvas>
-    </div>
+    <div class="card p-3 chart-wrapper">
+  <div class="chart-container">
+    <canvas id="barChart"></canvas>
+  </div>
+</div>
           </div>
         </div>
       </div>
 
        <!-- RIGHT SIDE (Pie) -->
   <div class="col-lg-3">
-    <div class="card p-3 h-100">
-      <canvas id="pieChart"></canvas>
+    <div class="card p-3 chart-wrapper">
+      <div class="chart-container">
+        <canvas id="pieChart"></canvas>
+      </div>
     </div>
   </div>
 
