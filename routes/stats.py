@@ -60,12 +60,13 @@ def monthly_stats():
 
         cursor.execute("""
             SELECT 
-    strftime('%m', created_at) as month,
-    COALESCE(SUM(CASE WHEN status='OK' THEN 1 ELSE 0 END), 0) as ok,
-    COALESCE(SUM(CASE WHEN status='NOT_OK' THEN 1 ELSE 0 END), 0) as not_ok
+    strftime('%Y-%m', created_at) as month,
+    COUNT(CASE WHEN status='OK' THEN 1 ELSE 0 END) as ok,
+    COUNT(CASE WHEN status='NOT_OK' THEN 1 ELSE 0 END) as not_ok
 FROM products
+WHERE created_at IS NOT NULL
 GROUP BY month
-ORDER BY month
+ORDER BY month ASC
         """)
 
         rows = cursor.fetchall()
@@ -101,19 +102,19 @@ def weekly_stats():
 
         cursor.execute("""
             SELECT 
-                strftime('%W', created_at) as week,
+                strftime('%Y', created_at) || '-W' || 
+                printf('%02d', CAST(strftime('%W', created_at) AS INTEGER)) as week,
 
-                COALESCE(SUM(
-                    CASE WHEN status='OK' THEN 1 ELSE 0 END
-                ),0) as valid,
+                COUNT(CASE WHEN status='OK' THEN 1 END) as valid,
 
-                COALESCE(SUM(
-                    CASE WHEN status='NOT_OK' THEN 1 ELSE 0 END
-                ),0) as invalid
+                COUNT(CASE WHEN status='NOT_OK' THEN 1 END) as invalid
 
             FROM products
+
+            WHERE created_at IS NOT NULL
+
             GROUP BY week
-            ORDER BY week
+            ORDER BY week ASC
         """)
 
         rows = cursor.fetchall()
@@ -123,7 +124,8 @@ def weekly_stats():
         invalid = []
 
         for row in rows:
-            weeks.append(f"Week {row[0]}")
+            # weeks.append(f"Week {row[0]}")
+            weeks.append(row[0])
             valid.append(row[1])
             invalid.append(row[2])
 
