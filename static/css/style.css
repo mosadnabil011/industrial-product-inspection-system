@@ -102,6 +102,7 @@ section {
   padding-left: 0.5rem !important;
   padding-right: 0.5rem !important;
   transition: 0.3s ease;
+
 }
 
 .sidebar-collapsed .sidebar-text {
@@ -256,7 +257,7 @@ h5 {
   height: 350px !important;
 }
 
-.chart-scroll {
+git push origin main .chart-scroll {
   width: 100%;
   overflow-x: auto;
   overflow-y: hidden;
