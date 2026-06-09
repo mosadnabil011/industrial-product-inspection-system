@@ -1,5 +1,6 @@
-const api_url = "http://127.0.0.1:5000";
-
+// const api_url = "http://127.0.0.1:5000";
+const api_url = "http://192.168.137.238:5000";
+// 192.168.137.238
 // ==================== THEME TOGGLE ====================
 const toggleBtn = document.getElementById("themeToggleBtn");
 const icon = document.getElementById("themeIcon");
@@ -35,8 +36,8 @@ const lineCtx = document.getElementById('lineChart');
 const barCtx = document.getElementById('barChart');
 const pieCtx = document.getElementById('pieChart');
 
-const colorGood = '#1B2335 ';
-const colorBad = '#ffaf32';
+const colorBad = '#FFAE3A';
+const colorGood = '#0E324E';
 // LINE
 
 const lineChart = new Chart(lineCtx, {
@@ -376,7 +377,13 @@ async function fetchWeekly() {
 
         if (!data.weeks || !data.valid || !data.invalid) return;
 
-        lineChart.data.labels = data.weeks;
+        // lineChart.data.labels = data.weeks;
+        lineChart.data.labels = data.weeks.map(w => {
+
+            const [year, week] = w.split("-W");
+
+            return `Week ${week} - ${year}`;
+        });
 
         lineChart.data.datasets[0].data = data.valid;
         lineChart.data.datasets[1].data = data.invalid;
@@ -399,7 +406,13 @@ async function fetchMonthly() {
 
         const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
-        barChart.data.labels = data.months.map(m => monthNames[parseInt(m) - 1]);
+        // barChart.data.labels = data.months.map(m => monthNames[parseInt(m) - 1]);
+        barChart.data.labels = data.months.map(m => {
+
+            const [year, month] = m.split("-");
+
+            return `${monthNames[parseInt(month) - 1]} ${year}`;
+        });
         barChart.data.datasets[0].data = data.valid;
         barChart.data.datasets[1].data = data.invalid;
 
