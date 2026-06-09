@@ -25,7 +25,7 @@ class VisionSystem:
 
     def __init__(self, motor_controller):
         self.motor_controller = motor_controller
-        self.model = YOLO("yolov8n.pt")
+        self.model = YOLO("best.pt")
 
         self.counted_ids = set()
         self.running = False
@@ -61,9 +61,8 @@ class VisionSystem:
 
         picam2 = Picamera2()
 
-        # BGR888 عشان OpenCV و YOLO يشتغلوا معاه مباشرة
         config = picam2.create_preview_configuration(
-            main={"size": (640, 480), "format": "BGR888"}
+            main={"size": (640, 480), "format": "RGB888"}
         )
         picam2.configure(config)
         picam2.start()
@@ -75,7 +74,6 @@ class VisionSystem:
 
         while self.running:
 
-            # capture_array بترجع numpy array مباشرة - مفيش ret
             frame = picam2.capture_array()
 
             if frame is None or frame.size == 0:
@@ -137,7 +135,7 @@ class VisionSystem:
             return "Unknown"
 
         total = obj.shape[0] * obj.shape[1]
-        hsv = cv2.cvtColor(obj, cv2.COLOR_BGR2HSV)
+        hsv = cv2.cvtColor(obj, cv2.COLOR_RGB2HSV)
 
         red_mask = cv2.bitwise_or(
             cv2.inRange(hsv, np.array(RED_RANGES_HSV[0][0]), np.array(RED_RANGES_HSV[0][1])),
