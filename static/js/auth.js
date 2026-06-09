@@ -12,10 +12,9 @@ function setLoggedIn() {
 
 function logout() {
   sessionStorage.removeItem("auth");
-  window.location.replace("login.html"); // replace بدل href
+  window.location.replace("login.html");
 }
 
-// ---- guard: ضيفها في أول سطر في dashboard ----
 function requireAuth() {
   if (!isLoggedIn()) {
     window.location.replace("login.html");
@@ -25,9 +24,7 @@ function requireAuth() {
 // ---- login page logic ----
 (function initLoginPage() {
   const form = document.getElementById("loginForm");
-  if (!form) return;                         // مش على صفحة اللوج ان
-
-  // لو موجود بالفعل، وجّهه للداش بورد
+  if (!form) return;
   if (isLoggedIn()) {
     window.location.replace("dashboard.html");
     return;
@@ -63,7 +60,6 @@ function requireAuth() {
     btnText.classList.add("d-none");
     btnSpinner.classList.remove("d-none");
 
-    // تأخير بسيط عشان ميبانش instant (اختياري)
     await new Promise(r => setTimeout(r, 700));
 
     if (pwd === PANEL_PASSWORD) {
