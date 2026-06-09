@@ -36,7 +36,7 @@ const lineCtx = document.getElementById('lineChart');
 const barCtx = document.getElementById('barChart');
 const pieCtx = document.getElementById('pieChart');
 
-const colorGood = '#1abc9c';
+const colorGood = '#1B2335 ';
 const colorBad = '#ffaf32';
 // LINE
 
