@@ -68,6 +68,11 @@
             </p>
           </div>
         </div>
+      <div class="mt-auto pt-3 border-top border-secondary">
+  <button class="btn btn-danger btn-sm w-100 " onclick="logout()">
+    <i class="fa-solid fa-right-from-bracket me-2"></i><span class="sidebar-text">Logout</span>
+  </button>
+</div>
       </div>
       <!-- Main Content -->
       <div class="container " >
@@ -136,7 +141,7 @@
   <h5><i class="fa-solid fa-tv"></i> Live</h5>
   <hr>
   <div style="height:100%; display:flex; justify-content:center; align-items:center;">
-    <img src="http://192.168.137.238:5000/video_feed" style="max-height:100%; max-width:100%; object-fit:contain;"  />
+    <img src="http://127.0.0.1:5000/video_feed" style="max-height:100%; max-width:100%; object-fit:contain;"  />
   </div>
 </div>
     
@@ -272,6 +277,8 @@
       crossorigin="anonymous"
     ></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="../static/js/auth.js"></script>
+    <script>requireAuth();</script>
     <script src="../static/js/main.js"></script>
   </body>
 </html>
