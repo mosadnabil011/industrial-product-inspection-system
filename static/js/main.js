@@ -4,8 +4,7 @@ const api_url = "http://192.168.137.238:5000";
 // ==================== THEME TOGGLE ====================
 const toggleBtn = document.getElementById("themeToggleBtn");
 const icon = document.getElementById("themeIcon");
-// let lastOk = null;
-// let lastNotOk = null;
+
 if (localStorage.getItem("theme")) {
     document.body.className = localStorage.getItem("theme");
     updateIcon();
@@ -120,44 +119,6 @@ const pieChart = new Chart(pieCtx, {
     }]
 });
 
-// BAR
-// const barChart = new Chart(barCtx, {
-//     type: 'bar',
-//     data: {
-//         labels: ['Valid', 'Invalid'],
-//         datasets: [{
-//             data: [0, 0],
-//             backgroundColor: [colorGood, colorBad],
-//             borderRadius: 8
-//         }]
-//     },
-//     options: {
-//         plugins: {
-//             legend: { display: false }
-//         },
-//         scales: {
-//             y: {
-//                 beginAtZero: true
-//             }
-//         }
-//     },
-//     plugins: [{
-//         id: 'labelPlugin',
-//         afterDatasetsDraw(chart) {
-//             const { ctx } = chart;
-//             chart.data.datasets.forEach((dataset, i) => {
-//                 const meta = chart.getDatasetMeta(i);
-//                 meta.data.forEach((bar, index) => {
-//                     const value = dataset.data[index];
-//                     ctx.fillStyle = "#000";
-//                     ctx.font = "bold 14px sans-serif";
-//                     ctx.textAlign = "center";
-//                     ctx.fillText(value, bar.x, bar.y - 5);
-//                 });
-//             });
-//         }
-//     }]
-// });
 const barChart = new Chart(barCtx, {
     type: 'bar',
     data: {
@@ -194,7 +155,6 @@ const barChart = new Chart(barCtx, {
 function updateCharts(ok, notOk) {
     pieChart.data.datasets[0].data = [ok, notOk];
     pieChart.update();
-
 
 }
 
@@ -280,29 +240,6 @@ function updateButton(btn, state) {
 }
 
 // ==================== FETCH BOXES ====================
-// async function fetchBoxes() {
-//     try {
-//         const res = await fetch(`${api_url}/api/stats/summary`);
-//         const data = await res.json();
-//         console.log("Boxes API response:", data);
-
-//         const ok = data.ok || 0;
-//         const notOk = data.not_ok || 0;
-//         const total = ok + notOk;
-
-//         if (TBoxes) TBoxes.textContent = total;
-//         if (VBoxes) VBoxes.textContent = ok;
-//         if (IVBoxes) IVBoxes.textContent = notOk;
-//         if (DR) DR.textContent = total > 0 ? ((notOk / total) * 100).toFixed(1) + "%" : "0%";
-
-//     } catch (e) {
-//         console.error("Fetch boxes data failed:", e);
-//         showErrorToast("Error fetching boxes data!");
-//     }
-// }
-
-
-// let timeIndex = 0;
 
 async function fetchBoxes() {
     try {
@@ -320,50 +257,7 @@ async function fetchBoxes() {
         DR.textContent = total > 0 ? ((notOk / total) * 100).toFixed(1) + "%" : "0%";
 
         // ================= Charts Update =================
-
-        // Pie + Bar
-        // pieChart.data.datasets[0].data = [ok, notOk];
-        // barChart.data.datasets[0].data = [ok, notOk];
-
-        // pieChart.update();
-        // barChart.update();
         updateCharts(ok, notOk);
-
-        // timeIndex++;
-
-        // lineChart.data.labels.push(timeIndex);
-        // lineChart.data.datasets[0].data.push(ok);
-        // lineChart.data.datasets[1].data.push(notOk);
-
-        // if (lineChart.data.labels.length > 20) {
-        //     lineChart.data.labels.shift();
-        //     lineChart.data.datasets[0].data.shift();
-        //     lineChart.data.datasets[1].data.shift();
-        // }
-
-        // lineChart.update();
-        //last
-        // if (lastOk === null || ok !== lastOk || notOk !== lastNotOk) {
-
-        //     /* The above code is incrementing the value of the variable `timeIndex` by 1. */
-        //     timeIndex++;
-
-        //     lineChart.data.labels.push(timeIndex);
-        //     lineChart.data.datasets[0].data.push(ok);
-        //     lineChart.data.datasets[1].data.push(notOk);
-
-        //     if (lineChart.data.labels.length > 50) {
-        //         lineChart.data.labels.shift();
-        //         lineChart.data.datasets[0].data.shift();
-        //         lineChart.data.datasets[1].data.shift();
-        //     }
-
-        //     lineChart.update();
-        //     lineCtx.style.width = `${lineChart.data.labels.length * 80}px`;
-        //     lastOk = ok;
-        //     lastNotOk = notOk;
-        // }
-
     } catch (e) {
         console.error("Fetch boxes data failed:", e);
     }
@@ -406,7 +300,6 @@ async function fetchMonthly() {
 
         const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
-        // barChart.data.labels = data.months.map(m => monthNames[parseInt(m) - 1]);
         barChart.data.labels = data.months.map(m => {
 
             const [year, month] = m.split("-");
@@ -529,7 +422,7 @@ async function generateReport() {
         return;
     }
 
-    // فتح PDF في تاب جديدة
+    // Open the report in a new tab
     window.open(`${api_url}/api/report?date=${date}`, "_blank");
 }
 // ==================== INIT ====================
@@ -537,7 +430,7 @@ fetchLineState();
 fetchBoxes();
 fetchMonthly();
 fetchWeekly();
-setInterval(fetchLineState, 1000);
-setInterval(fetchBoxes, 1000);
+setInterval(fetchLineState, 2000);
+setInterval(fetchBoxes, 2000);
 setInterval(fetchMonthly, 60000);
 setInterval(fetchWeekly, 300000);
