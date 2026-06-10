@@ -33,14 +33,25 @@ class MotorController:
 
             # button
             if motor["button_pin"] is not None:
-                motor["button"] = Button(motor["button_pin"])
+                # motor["button"] = Button(motor["button_pin"])
+                motor["button"] = Button(
+                        motor["button_pin"],
+                        pull_up=True,
+                        bounce_time=0.2
+                        )
                 motor["button"].when_pressed = lambda n = name: self.toggle_motor(n)
 
         # emergency button
+        # self.emergency_button = Button(self.emergency_button_pin)
         self.emergency_button = Button(self.emergency_button_pin)
         self.emergency_button.when_pressed = self.emergency_stop
         # start button
-        self.start_button = Button(self.start_button_pin)
+        # self.start_button = Button(self.start_button_pin)
+        self.start_button = Button(
+            self.start_button_pin,
+            pull_up=True,
+            bounce_time=0.2
+        )
         self.start_button.when_pressed = self.start_system
     # ========================
     # Dynamic Methods
@@ -115,7 +126,7 @@ class MotorController:
                 motor["state"] = False
                 motor["relay"].on()  # trigger relay to turn OFF the pusher
 
-        self.stop_event.clear()
+        # self.stop_event.clear()
         threading.Thread(target=worker, daemon=True).start()
 
     def stop_pusher(self):
