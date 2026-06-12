@@ -79,7 +79,7 @@ const pieChart = new Chart(pieCtx, {
         }]
     },
     options: {
-        cutout: '0%',
+        cutout: '50%',
         plugins: {
             legend: {
                 position: 'bottom'
@@ -129,25 +129,40 @@ const barChart = new Chart(barCtx, {
                 label: 'Valid',
                 data: [],
                 backgroundColor: colorGood,
-                borderRadius: 8,
-                barThickness: 'flex'
+                borderRadius: 12,
+                maxBarThickness: 30,
+                categoryPercentage: 0.6,
+                barPercentage: 0.7
             },
             {
                 label: 'Invalid',
                 data: [],
                 backgroundColor: colorBad,
-                borderRadius: 8,
-                barThickness: 'flex'
+                borderRadius: 12,
+                maxBarThickness: 30,
+                categoryPercentage: 0.6,
+                barPercentage: 0.7
             }
         ]
     },
     options: {
+        responsive: true,
         plugins: {
-            legend: { display: true }
+            legend: {
+                position: 'top'
+            }
         },
         scales: {
+            x: {
+                grid: {
+                    display: false
+                }
+            },
             y: {
-                beginAtZero: true
+                beginAtZero: true,
+                grid: {
+                    color: 'rgba(255,255,255,0.08)'
+                }
             }
         }
     }
