@@ -115,10 +115,11 @@ class VisionSystem:
 
                     color = self._detect_color(frame[y1:y2, x1:x2])
                     self._insert_into_db(self.model.names[cls], color)
-
+                    print("count debug")
                     if cls != 0:
+                        print("defect debug")
                         self.motor_controller.run_pusher(3)
-
+                        
             annotated = self._annotate(result.plot())
 
             with self._frame_lock:
