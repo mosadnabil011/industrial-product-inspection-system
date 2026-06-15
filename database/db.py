@@ -1,5 +1,5 @@
 import sqlite3
-
+from database.models import create_tables
 DB_NAME = "Production_DB.db"
 
 
@@ -8,8 +8,7 @@ def get_db():
 
 
 def init_db():
-    from database.models import create_tables
     db = get_db()
     create_tables(db)
     db.close()
-    
+
