@@ -18,14 +18,7 @@ def init_control_routes(motor_controller):
         return jsonify({
             "bad_motor": state
         }), 200
-
-    # @control_bp.route("/toggle-pusher", methods=["POST"])
-    # def toggle_pusher_line():
-    #     state = motor_controller.toggle_motor("pusher")
-    #     return jsonify({
-    #         "pusher_motor": state
-    #     }), 200
-
+        
     @control_bp.route("/run-pusher", methods=["POST"])
     def run_pusher():
         motor_controller.run_pusher()

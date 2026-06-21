@@ -14,13 +14,13 @@ class MotorController:
         # Motor Configuration
         # ========================
         self.motors = {
-            "main": {"relay_pin": 23, "button_pin": 17, "state": False},
-            "bad": {"relay_pin": 24, "button_pin": 27, "state": False},
+            "main": {"relay_pin": 23, "button_pin": None, "state": False},
+            "bad": {"relay_pin": 24, "button_pin": None, "state": False},
             "pusher": {"relay_pin": 25, "button_pin": None, "state": False},
+            "back_motor_pusher": {"relay_pin": 5, "button_pin": None, "state": False}
         }
-        
         self.start_button_pin = 21
-        self.emergency_button_pin = 22
+        self.emergency_button_pin = 20
 
         # ========================
         # Devices Setup
@@ -43,13 +43,16 @@ class MotorController:
 
         # emergency button
         # self.emergency_button = Button(self.emergency_button_pin)
-        self.emergency_button = Button(self.emergency_button_pin)
+        self.emergency_button = Button(
+                self.emergency_button_pin,
+                 bounce_time=0.2
+            )
         self.emergency_button.when_pressed = self.emergency_stop
         # start button
         # self.start_button = Button(self.start_button_pin)
         self.start_button = Button(
             self.start_button_pin,
-            pull_up=True,
+                pull_up=True,
             bounce_time=0.2
         )
         self.start_button.when_pressed = self.start_system
@@ -104,7 +107,7 @@ class MotorController:
         self.motors["bad"]["state"] = True
         self.motors["bad"]["relay"].off()
     
-    def run_pusher(self, seconds=8):
+    def run_pusher(self, seconds=.1):
 
         def worker():
             if self.stop_event.is_set():
@@ -120,13 +123,31 @@ class MotorController:
             while time.time() - start_time < seconds:
                 if self.stop_event.is_set():
                     break
-                time.sleep(0.1)
+                time.sleep(0.4)
 
             with self.lock:
                 motor["state"] = False
                 motor["relay"].on()  # trigger relay to turn OFF the pusher
+            # ==========================
+            # Wait 1 second
+            # ==========================
+            time.sleep(1)
 
-        # self.stop_event.clear()
+            # ==========================
+            # Run backward for 0.5 sec
+            # ==========================
+            with self.lock:
+                back_motor = self.motors["back_motor_pusher"]
+                back_motor["state"] = True
+                back_motor["relay"].off()
+
+            time.sleep(0.2)
+
+            with self.lock:
+                back_motor["state"] = False
+                back_motor["relay"].on()
+
+        self.stop_event.clear()
         threading.Thread(target=worker, daemon=True).start()
 
     def stop_pusher(self):

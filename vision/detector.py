@@ -114,11 +114,16 @@ class VisionSystem:
                     self.counted_ids.add(obj_id)
 
                     color = self._detect_color(frame[y1:y2, x1:x2])
+                    print(
+                        f"SAVE -> ID={obj_id}, "
+                        f"Status={self.model.names[cls]}, "
+                        f"Color={color}"
+                    )
                     self._insert_into_db(self.model.names[cls], color)
                     print("count debug")
-                    if cls != 0:
+                    if cls != 1:
                         print("defect debug")
-                        self.motor_controller.run_pusher(3)
+                        self.motor_controller.run_pusher()
                         
             annotated = self._annotate(result.plot())
 
@@ -136,19 +141,23 @@ class VisionSystem:
             return "Unknown"
 
         total = obj.shape[0] * obj.shape[1]
-        hsv = cv2.cvtColor(obj, cv2.COLOR_RGB2HSV)
+        hsv = cv2.cvtColor(obj, cv2.COLOR_BGR2HSV)
 
         red_mask = cv2.bitwise_or(
             cv2.inRange(hsv, np.array(RED_RANGES_HSV[0][0]), np.array(RED_RANGES_HSV[0][1])),
             cv2.inRange(hsv, np.array(RED_RANGES_HSV[1][0]), np.array(RED_RANGES_HSV[1][1]))
         )
+        red_pixels = np.sum(red_mask == 255)
 
-        if np.sum(red_mask == 255) > 0.7 * total:
+        print(f"RED RATIO = {red_pixels / total:.2f}"
+)
+        if np.sum(red_mask == 255) > 0.2 * total:
+			
             return "Red"
 
         for color, (low, high) in COLOR_RANGES_HSV.items():
             mask = cv2.inRange(hsv, np.array(low), np.array(high))
-            if np.sum(mask == 255) > 0.7 * total:
+            if np.sum(mask == 255) > 0.2 * total:
                 return color
 
         return "Unknown"
@@ -179,6 +188,7 @@ class VisionSystem:
             )
 
             db.commit()
+            print(f"Saved -> {status} | {color}")
             db.close()
 
         except Exception as e:

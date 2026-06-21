@@ -7,6 +7,7 @@ stats_bp = Blueprint("stats", __name__)
 
 @stats_bp.route("/summary", methods=["GET"])
 def summary():
+    db = None
     try:
         db = get_db()
         cursor = db.cursor()
@@ -37,8 +38,6 @@ def summary():
         color_counts = cursor.fetchall()
         colors = {color: count for color, count in color_counts}
 
-        db.close()
-
         return jsonify({
             "ok": ok_count,
             "not_ok": not_ok_count,
@@ -46,14 +45,18 @@ def summary():
         }), 200
 
     except Exception as e:
-        logging.error(f"Stats Error: {e}")
+        logging.exception(f"Stats Error: {e}")
         return jsonify({
             "error": "Failed to fetch statistics"
         }), 500
+    finally:
+        if db:
+            db.close()
 
         
 @stats_bp.route("/monthly", methods=["GET"])
 def monthly_stats():
+    db = None
     try:
         db = get_db()
         cursor = db.cursor()
@@ -61,8 +64,8 @@ def monthly_stats():
         cursor.execute("""
             SELECT 
     strftime('%Y-%m', created_at) as month,
-    COUNT(CASE WHEN status='OK' THEN 1 ELSE 0 END) as ok,
-    COUNT(CASE WHEN status='NOT_OK' THEN 1 ELSE 0 END) as not_ok
+    SUM(CASE WHEN status='OK' THEN 1 ELSE 0 END) as ok,
+    SUM(CASE WHEN status='NOT_OK' THEN 1 ELSE 0 END) as not_ok
 FROM products
 WHERE created_at IS NOT NULL
 GROUP BY month
@@ -77,10 +80,8 @@ ORDER BY month ASC
 
         for row in rows:
             months.append(row[0])
-            ok_data.append(row[1])
-            not_ok_data.append(row[2])
-
-        db.close()
+            ok_data.append(row[1] or 0)
+            not_ok_data.append(row[2] or 0)
 
         return jsonify({
             "months": months,
@@ -89,13 +90,16 @@ ORDER BY month ASC
         })
 
     except Exception as e:
-        logging.error(f"Monthly Stats Error: {e}")
+        logging.exception(f"Monthly Stats Error: {e}")
         return jsonify({"error": "failed"}), 500
-
+    finally:
+        if db:
+            db.close()
+    
 
 @stats_bp.route("/weekly", methods=["GET"])
 def weekly_stats():
-
+    db = None
     try:
         db = get_db()
         cursor = db.cursor()
@@ -105,9 +109,8 @@ def weekly_stats():
                 strftime('%Y', created_at) || '-W' || 
                 printf('%02d', CAST(strftime('%W', created_at) AS INTEGER)) as week,
 
-                COUNT(CASE WHEN status='OK' THEN 1 END) as valid,
-
-                COUNT(CASE WHEN status='NOT_OK' THEN 1 END) as invalid
+                SUM(CASE WHEN status='OK' THEN 1 ELSE 0 END) as valid,
+                SUM(CASE WHEN status='NOT_OK' THEN 1 ELSE 0 END) as invalid
 
             FROM products
 
@@ -126,10 +129,8 @@ def weekly_stats():
         for row in rows:
             # weeks.append(f"Week {row[0]}")
             weeks.append(row[0])
-            valid.append(row[1])
-            invalid.append(row[2])
-
-        db.close()
+            valid.append(row[1] or 0)
+            invalid.append(row[2] or 0)
 
         return jsonify({
             "weeks": weeks,
@@ -138,7 +139,11 @@ def weekly_stats():
         })
 
     except Exception as e:
-        logging.error(f"Weekly Stats Error: {e}")
+        logging.exception(f"Weekly Stats Error: {e}")
         return jsonify({
             "error": "failed"
         }), 500
+    finally:
+        if db:
+            db.close()
+    

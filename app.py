@@ -1,4 +1,4 @@
-from flask import Flask, render_template, stream_with_context, Response
+from flask import Flask, render_template, Response
 from database.db import init_db
 from gpio.controller import MotorController
 from routes.control import init_control_routes
@@ -51,10 +51,6 @@ def create_app():
             mimetype="multipart/x-mixed-replace; boundary=frame"
         )
 
-    # @app.route("/")
-    # def dashboard():
-    #     return render_template("dashboard.html")
-    
     @app.route("/")
     def home():
         return render_template("login.html")
@@ -73,6 +69,4 @@ def create_app():
 if __name__ == "__main__":
     app = create_app()
     CORS(app)
-    for rule in app.url_map.iter_rules():
-        print(rule)
     app.run(host="0.0.0.0", port=5000, threaded=True)
