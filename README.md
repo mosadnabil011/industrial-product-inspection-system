@@ -542,7 +542,7 @@ sudo lsof -t -i:5000 | xargs kill -9
 
 This project was supervised by **Prof. Mohamed Moawad**, whose guidance, technical feedback, and continuous support throughout the development process were instrumental in bringing this system to completion.
 
-We would also like to thank the Computer Engineering Department for providing the resources and environment necessary to carry out this graduation project.
+We would also like to thank the Communications and Computers Engineering Department for providing the resources and environment necessary to carry out this graduation project.
 
 ---
 
