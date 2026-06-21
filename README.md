@@ -82,7 +82,7 @@ Camera → picamera2 frame → YOLOv8 track()
 
 | Component          | Details                                                            |
 | ------------------ | ------------------------------------------------------------------ |
-| **Raspberry Pi 4** | 2 GB RAM minimum recommended                                       |
+| **Raspberry Pi 5** | 2 GB RAM minimum recommended                                       |
 | **Camera**         | Raspberry Pi Camera Module v2 (CSI connector, used via picamera2)  |
 | **Relay Module**   | 4-channel active-LOW relay                                         |
 | **Motors**         | 4 DC motors: Main belt, Bad/reject belt, Pusher, Back-motor pusher |
