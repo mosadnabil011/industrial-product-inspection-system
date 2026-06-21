@@ -32,7 +32,7 @@ A real-time automated quality control system built for conveyor belt production 
 
 FORCE automates quality inspection on a conveyor belt production line:
 
-1. A Raspberry Pi Camera Module captures live video of products on the belt.
+1. A Raspberry Pi Camera Module 3 captures live video of products on the conveyor belt through the CSI interface.
 2. A **YOLOv8** model (`best.pt`) detects and tracks each product using **ByteTrack**.
 3. Each product's dominant colour is identified via **HSV-based colour detection** (Red, Green, Blue, Yellow).
 4. Products classified as defective (any class other than `OK`) trigger a **pusher motor** via GPIO relay to divert them off the main belt.
@@ -45,6 +45,7 @@ FORCE automates quality inspection on a conveyor belt production line:
 - HSV colour detection: Red, Green, Blue, Yellow, Unknown
 - Relay-controlled motors through Raspberry Pi GPIO (gpiozero)
 - Physical start button and emergency-stop button wired to GPIO
+- High-resolution image acquisition using Raspberry Pi Camera Module 3
 - Live MJPEG video stream embedded in the browser
 - REST API for motor control and production statistics (summary, monthly, weekly)
 - Dark-mode responsive web dashboard (Bootstrap 5)
@@ -83,7 +84,7 @@ Camera → picamera2 frame → YOLOv8 track()
 | Component          | Details                                                            |
 | ------------------ | ------------------------------------------------------------------ |
 | **Raspberry Pi 5** | 2 GB RAM minimum recommended                                       |
-| **Camera**         | Raspberry Pi Camera Module v2 (CSI connector, used via picamera2)  |
+| **Camera**         | Raspberry Pi Camera Module 3 (CSI connector, used via picamera2)   |
 | **Relay Module**   | 4-channel active-LOW relay                                         |
 | **Motors**         | 4 DC motors: Main belt, Bad/reject belt, Pusher, Back-motor pusher |
 | **Buttons**        | Start button (GPIO 21), Emergency stop (GPIO 20)                   |
@@ -517,15 +518,16 @@ sudo lsof -t -i:5000 | xargs kill -9
 
 ## 13. Known Limitations & Future Work
 
-| Area            | Current State               | Suggested Improvement                        |
-| --------------- | --------------------------- | -------------------------------------------- |
-| Authentication  | No login on API endpoints   | Add Flask-Login before network deployment    |
-| Database writes | Synchronous, per-detection  | Queue-based async writer for high throughput |
-| Camera          | CSI camera only (picamera2) | Add USB webcam fallback via OpenCV           |
-| MJPEG stream    | Fixed ~30 fps               | Adaptive frame rate based on CPU load        |
-| Report          | Monthly aggregation only    | Add daily drill-down and colour breakdown    |
-| Model           | Single `best.pt` file       | Add model hot-swap endpoint                  |
-| Pusher timing   | Fixed 0.1 s / 1 s / 0.2 s   | Expose timing via config file                |
+| Area                | Current State               | Suggested Improvement                            |
+| ------------------- | --------------------------- | ------------------------------------------------ |
+| Authentication      | No login on API endpoints   | Add Flask-Login before network deployment        |
+| Database writes     | Synchronous, per-detection  | Queue-based async writer for high throughput     |
+| Camera              | CSI camera only (picamera2) | Add USB webcam fallback via OpenCV               |
+| MJPEG stream        | Fixed ~30 fps               | Adaptive frame rate based on CPU load            |
+| Report              | Monthly aggregation only    | Add daily drill-down and colour breakdown        |
+| Model               | Single `best.pt` file       | Add model hot-swap endpoint                      |
+| Pusher timing       | Fixed 0.1 s / 1 s / 0.2 s   | Expose timing via config file                    |
+| Inspection Coverage | Single-side inspection only | Add multi-camera setup for 360° defect detection |
 
 ---
 
@@ -543,6 +545,21 @@ sudo lsof -t -i:5000 | xargs kill -9
 This project was supervised by **Prof. Mohamed Moawad**, whose guidance, technical feedback, and continuous support throughout the development process were instrumental in bringing this system to completion.
 
 We would also like to thank the Communications and Computers Engineering Department for providing the resources and environment necessary to carry out this graduation project.
+
+---
+
+## Team Members
+
+This project was developed by:
+
+- Ahmed Hamada Atef Sayed Sheta
+- Ahmed Reda Badrakhan Badrakhan
+- Ahmed Sayed Ibrahim El-Yammany
+- Ahmed Shreif Mahmoud AbdAlAty
+- Ayman Mohamed El-Said Awad
+- Khaled Ahmed Alsayed El-Basionny
+- Omar Nagy Eldesoky Mohamed
+- Mosad Nabil Mosad Abokammer
 
 ---
 
